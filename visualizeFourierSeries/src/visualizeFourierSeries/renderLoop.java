@@ -14,14 +14,16 @@ public class renderLoop implements Runnable{
 			long delta_render = current_time - last_time_rendered;
 			
 			try {
-				Thread.sleep(20);
+				Thread.sleep(1);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 			
 			
+			
 			if(delta_render >= RENDER_WAIT_TIME) {
 				last_time_rendered = System.nanoTime();
+				appWindow.testAngle += 0.1;
 				
 				Main.app_window.render(); // Render one frame
 			}

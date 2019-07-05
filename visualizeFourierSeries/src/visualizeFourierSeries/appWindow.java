@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Polygon;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -31,6 +32,7 @@ public class appWindow extends JFrame{
 	// Different application status values
 	public static final int DRAWING_IMAGE = 1;
 	public static final int RENDERING_FOURIER_ANIMATION = 2;
+	public static double testAngle = 0;
 
 	public appWindow(String window_title) {
 		
@@ -52,7 +54,12 @@ public class appWindow extends JFrame{
 						
 						complexNumber complex_value = mathematics.pixel_to_complex_value(new Point(x, y));
 						DecimalFormat numberFormat = new DecimalFormat("0.0000");
-						g2.drawString("Complex value: " + numberFormat.format(complex_value.getRealPart()) + ",   " + numberFormat.format(complex_value.getImagPart()), 40, 80);
+						if(complex_value.getImagPart() < 0) {
+							g2.drawString("Complex value: " + numberFormat.format(complex_value.getRealPart()) + "-" + numberFormat.format(Math.abs(complex_value.getImagPart())) + "i", 40, 80);
+						}
+						else {
+							g2.drawString("Complex value: " + numberFormat.format(complex_value.getRealPart()) + "+" + numberFormat.format(Math.abs(complex_value.getImagPart())) + "i", 40, 80);
+						}
 						
 						for(int i = 0; i < drawn_image_array.size()-1; i++) {
 							
@@ -67,12 +74,15 @@ public class appWindow extends JFrame{
 						break;
 						
 					case RENDERING_FOURIER_ANIMATION:
-						this.setBackground(new Color(x/10, y/10, 0));
+						this.setBackground(new Color(Math.max(x/10, 0), Math.max(y/10, 0), 0));
 						g2.setColor(Color.red);
 						g2.drawOval(x+20, y+20, 40, 40);
+						
+						drawArrow(g2, testAngle, 0.5, 650, 500);
+						
 						break;
 					default:
-						this.setBackground(Color.BLACK);;
+						this.setBackground(Color.BLACK);
 						break;
 				}
 				
@@ -107,11 +117,8 @@ public class appWindow extends JFrame{
 				
 				if(current_app_status == DRAWING_IMAGE){
 					rendering_panel.repaint();
-					
-				//	current_app_status = 2;
-				//	Thread renderThread = new Thread(new renderLoop());
-				//	renderThread.start();
 				}
+				
 			}
 		});
 		
@@ -123,10 +130,13 @@ public class appWindow extends JFrame{
 			public void mousePressed(MouseEvent arg0) {}
 
 			public void mouseReleased(MouseEvent arg0) {
-				System.out.println("Released mouse button");
-				current_app_status = 2;
-				Thread renderThread = new Thread(new renderLoop());
-				renderThread.start();
+				
+				if(current_app_status == DRAWING_IMAGE){
+					System.out.println("Released mouse button");
+					current_app_status = 2;
+					Thread renderThread = new Thread(new renderLoop());
+					renderThread.start();
+				}
 			}
 			
 		});
@@ -136,6 +146,31 @@ public class appWindow extends JFrame{
 		
 		
 		this.setVisible(true);
+	}
+	
+	public void drawArrow(Graphics2D g2, double angle_in_radians, double scale, int x, int y) {
+		Point point1 = mathematics.point2x2MatrixMult(mathematics.similarityTransformationMatrix(angle_in_radians, scale), new Point(25, -75));
+		Point point2 = mathematics.point2x2MatrixMult(mathematics.similarityTransformationMatrix(angle_in_radians, scale), new Point(75, -75));
+		Point point3 = mathematics.point2x2MatrixMult(mathematics.similarityTransformationMatrix(angle_in_radians, scale), new Point(75, -25));
+		point1 = new Point(point1.x+x, point1.y+y);
+		point2 = new Point(point2.x+x, point2.y+y);
+		point3 = new Point(point3.x+x, point3.y+y);
+		
+		Point point4 = new Point(x, y);
+		Point point5 = mathematics.point2x2MatrixMult(mathematics.similarityTransformationMatrix(angle_in_radians, scale), new Point(50, -50));
+		point5 = new Point(point5.x+x, point5.y+y);
+		
+		int circleRadius = (int) (Math.sqrt(Math.pow(scale*50, 2) + Math.pow(scale*50, 2)) + (scale*50)/(Math.cos(Math.PI/4)*2));
+		g2.drawOval(x-circleRadius, y-circleRadius, circleRadius*2, circleRadius*2);
+		
+		
+		int[] xPoints = {point1.x, point2.x, point3.x};
+		int[] yPoints = {point1.y, point2.y, point3.y};
+		Polygon arrowHead = new Polygon(xPoints, yPoints, 3);
+		g2.fill(arrowHead);
+		g2.setStroke(new BasicStroke((int) (scale*12)));
+		g2.drawLine(point4.x, point4.y, point5.x, point5.y);
+		g2.setStroke(new BasicStroke(1));
 	}
 	
 	public void render(){
