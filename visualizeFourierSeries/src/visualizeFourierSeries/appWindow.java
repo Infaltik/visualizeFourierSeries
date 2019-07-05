@@ -16,6 +16,11 @@ public class appWindow extends JFrame{
 	int x = 0, y = 0;
 	int prev_x = 0, prev_y = 0;
 	ArrayList<complexNumber> drawn_image_array = new ArrayList<complexNumber>();
+	int current_app_status = 1;
+	
+	// Different application status values
+	public static final int DRAWING_IMAGE = 1;
+	public static final int RENDERING_FOURIER_ANIMATION = 2;
 
 	public appWindow(String window_title) {
 		
@@ -29,18 +34,33 @@ public class appWindow extends JFrame{
 			protected void paintComponent(Graphics g) {
 				Graphics2D g2 = (Graphics2D) g;
 				super.paintComponent(g2);
-				g2.drawString("Mouse position: " + x + ", " + y, 40, 40);
-				//g.drawLine(prev_x, prev_y, x, y);
-				for(int i = 0; i < drawn_image_array.size()-1; i++) {
-					
-					int current_x = drawn_image_array.get(i).getRealPart();
-					int current_y = drawn_image_array.get(i).getImagPart();
-					int next_x = drawn_image_array.get(i+1).getRealPart();
-					int next_y = drawn_image_array.get(i+1).getImagPart();
-					
-					g2.setStroke(new BasicStroke(5));
-					g2.drawLine(current_x, current_y, next_x, next_y);
+				
+				
+				switch(current_app_status){
+					case DRAWING_IMAGE:
+						g2.drawString("Mouse position: " + x + ", " + y, 40, 40);
+						
+						for(int i = 0; i < drawn_image_array.size()-1; i++) {
+							
+							int current_x = drawn_image_array.get(i).getRealPart();
+							int current_y = drawn_image_array.get(i).getImagPart();
+							int next_x = drawn_image_array.get(i+1).getRealPart();
+							int next_y = drawn_image_array.get(i+1).getImagPart();
+							
+							g2.setStroke(new BasicStroke(5));
+							g2.drawLine(current_x, current_y, next_x, next_y);
+						}
+						break;
+						
+					case RENDERING_FOURIER_ANIMATION:
+						this.setBackground(Color.GREEN);
+						break;
+					default:
+						this.setBackground(Color.BLACK);;
+						break;
 				}
+				
+				
 			}
 		};
 		
@@ -54,7 +74,10 @@ public class appWindow extends JFrame{
 				
 				x = e.getX();
 				y = e.getY();
-				drawn_image_array.add(new complexNumber(x, y));
+				
+				if(current_app_status == DRAWING_IMAGE){
+					drawn_image_array.add(new complexNumber(x, y));
+				}
 				
 				rendering_panel.repaint();
 			}
