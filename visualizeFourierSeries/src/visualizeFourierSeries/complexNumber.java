@@ -2,26 +2,26 @@ package visualizeFourierSeries;
 
 public class complexNumber {
 	
-	private int real_part, imag_part; // Should be changed to double later but need to implement coordinate system first
+	private double real_part, imag_part;
 	
-	public complexNumber(int real, int imag) {
+	public complexNumber(double real, double imag) {
 		real_part = real;
 		imag_part = imag;
 	}
 	
-	public int getRealPart() {
+	public double getRealPart() {
 		return real_part;
 	}
 	
-	public int getImagPart() {
+	public double getImagPart() {
 		return imag_part;
 	}
 	
-	public void setRealPart(int real) {
+	public void setRealPart(double real) {
 		real_part = real;
 	}
 	
-	public void setImagPart(int imag) {
+	public void setImagPart(double imag) {
 		imag_part = imag;
 	}
 
