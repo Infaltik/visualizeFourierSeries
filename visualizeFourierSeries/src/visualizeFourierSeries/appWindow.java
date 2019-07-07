@@ -27,6 +27,7 @@ public class appWindow extends JFrame{
 	int x = 0, y = 0;
 	int prev_x = 0, prev_y = 0;
 	ArrayList<Point> drawn_image_array = new ArrayList<Point>();
+	ArrayList<arrowAndCircleRenderData> arrow_circle_render_data_array = new ArrayList<arrowAndCircleRenderData>();
 	int current_app_status = 1;
 	
 	// Different application status values
@@ -52,7 +53,7 @@ public class appWindow extends JFrame{
 						
 						g2.drawString("Mouse position: " + x + ", " + y, 40, 40);
 						
-						complexNumber complex_value = mathematics.pixel_to_complex_value(new Point(x, y));
+						complexNumber complex_value = mathematics.pixelToComplexNumber(new Point(x, y));
 						DecimalFormat numberFormat = new DecimalFormat("0.0000");
 						if(complex_value.getImagPart() < 0) {
 							g2.drawString("Complex value: " + numberFormat.format(complex_value.getRealPart()) + "-" + numberFormat.format(Math.abs(complex_value.getImagPart())) + "i", 40, 80);
@@ -78,7 +79,15 @@ public class appWindow extends JFrame{
 						g2.setColor(Color.red);
 						g2.drawOval(x+20, y+20, 40, 40);
 						
-						drawArrow(g2, testAngle, 0.5, 650, 500);
+						
+						for(int i = 0; i < arrow_circle_render_data_array.size(); i++){
+							drawArrow(g2, arrow_circle_render_data_array.get(i), true);
+						}
+					//	drawArrow(g2, testAngle, 0.4, 650, 500, false);
+					//	drawArrow(g2, testAngle+0.5, 0.2, 700, 500, false);
+						
+					//	g2.setColor(Color.BLUE);
+					//	g2.fillRect(625, 475, 50, 50);
 						
 						break;
 					default:
@@ -134,6 +143,10 @@ public class appWindow extends JFrame{
 				if(current_app_status == DRAWING_IMAGE){
 					System.out.println("Released mouse button");
 					current_app_status = 2;
+					mathematics.convertToComplexAndStoreFunction(drawn_image_array);
+					System.out.println(mathematics.complexFunctionToApproximate.length);
+					mathematics.calculateFourierSeriesCoefficients();
+					
 					Thread renderThread = new Thread(new renderLoop());
 					renderThread.start();
 				}
@@ -148,29 +161,47 @@ public class appWindow extends JFrame{
 		this.setVisible(true);
 	}
 	
-	public void drawArrow(Graphics2D g2, double angle_in_radians, double scale, int x, int y) {
-		Point point1 = mathematics.point2x2MatrixMult(mathematics.similarityTransformationMatrix(angle_in_radians, scale), new Point(25, -75));
-		Point point2 = mathematics.point2x2MatrixMult(mathematics.similarityTransformationMatrix(angle_in_radians, scale), new Point(75, -75));
-		Point point3 = mathematics.point2x2MatrixMult(mathematics.similarityTransformationMatrix(angle_in_radians, scale), new Point(75, -25));
+	public void arrowPreRenderCalculations(double angle_in_radians, double scale, int x, int y){
+		
+		// Arrowhead calculations
+		Point point1 = mathematics.point2x2MatrixMult(mathematics.similarityTransformationMatrix(angle_in_radians, scale), new Point(50, -20));
+		Point point2 = mathematics.point2x2MatrixMult(mathematics.similarityTransformationMatrix(angle_in_radians, scale), new Point(75, 0));
+		Point point3 = mathematics.point2x2MatrixMult(mathematics.similarityTransformationMatrix(angle_in_radians, scale), new Point(50, 20));
 		point1 = new Point(point1.x+x, point1.y+y);
 		point2 = new Point(point2.x+x, point2.y+y);
 		point3 = new Point(point3.x+x, point3.y+y);
 		
-		Point point4 = new Point(x, y);
-		Point point5 = mathematics.point2x2MatrixMult(mathematics.similarityTransformationMatrix(angle_in_radians, scale), new Point(50, -50));
-		point5 = new Point(point5.x+x, point5.y+y);
-		
-		int circleRadius = (int) (Math.sqrt(Math.pow(scale*50, 2) + Math.pow(scale*50, 2)) + (scale*50)/(Math.cos(Math.PI/4)*2));
-		g2.drawOval(x-circleRadius, y-circleRadius, circleRadius*2, circleRadius*2);
-		
-		
 		int[] xPoints = {point1.x, point2.x, point3.x};
 		int[] yPoints = {point1.y, point2.y, point3.y};
 		Polygon arrowHead = new Polygon(xPoints, yPoints, 3);
-		g2.fill(arrowHead);
-		g2.setStroke(new BasicStroke((int) (scale*12)));
-		g2.drawLine(point4.x, point4.y, point5.x, point5.y);
-		g2.setStroke(new BasicStroke(1));
+		
+		// Arrow body calculations
+		Point body_arrow_connection = mathematics.point2x2MatrixMult(mathematics.similarityTransformationMatrix(angle_in_radians, scale), new Point(50, 0));
+		body_arrow_connection = new Point(body_arrow_connection.x+x, body_arrow_connection.y+y);
+		
+		// Circle radius calculations
+		int circleRadius = (int) (scale*(50 + 25));
+		
+		arrowAndCircleRenderData data = new arrowAndCircleRenderData(x, y, arrowHead, body_arrow_connection, (int) scale*8, circleRadius); 
+		
+		arrow_circle_render_data_array.add(data);
+	}
+	
+	public void drawArrow(Graphics2D g2, arrowAndCircleRenderData renderData, boolean showRotationCircle) {
+		
+		int circleRadius = renderData.getCircleRadius();
+		int x_pos = renderData.getX();
+		int y_pos = renderData.getY();
+		Point body_arrow_connection = renderData.getBodyArrowConnection();
+		
+		if(showRotationCircle){
+			g2.drawOval(x_pos-circleRadius, y_pos-circleRadius, circleRadius*2, circleRadius*2);
+		}
+		
+		g2.fill(renderData.getArrowHeadPolygon());
+		g2.setStroke(new BasicStroke(renderData.getArrowBodyStroke()));
+		g2.drawLine(x_pos, y_pos, body_arrow_connection.x, body_arrow_connection.y);
+		g2.setStroke(new BasicStroke(1)); // Reset the stroke to default
 	}
 	
 	public void render(){

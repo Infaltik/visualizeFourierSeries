@@ -9,6 +9,12 @@ public class complexNumber {
 		imag_part = imag;
 	}
 	
+	public complexNumber(double cmplxExpFcnInput){
+		// Complex number from complex exponential function
+		real_part = Math.cos(cmplxExpFcnInput);
+		imag_part = Math.sin(cmplxExpFcnInput);
+	}
+	
 	public double getRealPart() {
 		return real_part;
 	}
