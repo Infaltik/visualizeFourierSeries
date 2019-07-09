@@ -9,6 +9,7 @@ public class mathematics {
 	public static complexNumber[] complexFunctionToApproximate;
 	public static int originPixelX = appWindow.rendering_panel_width/2;
 	public static int originPixelY = appWindow.rendering_panel_height/2;
+	public static int pixelNormalizingFactor = originPixelY;
 	
 	
 	
@@ -102,10 +103,22 @@ public class mathematics {
 	
 	public static complexNumber pixelToComplexNumber(Point pixel){
 		
-		double real_part = ( (double)((int) pixel.getX()) - originPixelX ) / originPixelX;
-		double imag_part = -( (double)((int) pixel.getY()) - originPixelY ) / originPixelY;
+		double real_part = ( (double)((int) pixel.getX()) - originPixelX ) / pixelNormalizingFactor;
+		double imag_part = -( (double)((int) pixel.getY()) - originPixelY ) / pixelNormalizingFactor;
 		
 		return new complexNumber(real_part, imag_part);
+	}
+	
+	public static Point complexNumberToPixel(complexNumber complex_number){
+		
+		int x_pixel = (int) (complex_number.getRealPart()*pixelNormalizingFactor + originPixelX);
+		int y_pixel = (int) (-complex_number.getImagPart()*pixelNormalizingFactor + originPixelY);
+		
+		return new Point(x_pixel, y_pixel);
+	}
+	
+	public static double complexMagnitudeToPixelMagnitude(double complex_magnitude){
+		return complex_magnitude*pixelNormalizingFactor;
 	}
 	
 	public static complexNumber complexNumber2x2MatrixMult(double[][] matrix, complexNumber complex_number) {

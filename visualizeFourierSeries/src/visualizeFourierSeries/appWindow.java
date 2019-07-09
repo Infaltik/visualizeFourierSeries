@@ -77,8 +77,6 @@ public class appWindow extends JFrame{
 					case RENDERING_FOURIER_ANIMATION:
 						this.setBackground(new Color(Math.max(x/10, 0), Math.max(y/10, 0), 0));
 						g2.setColor(Color.red);
-						g2.drawOval(x+20, y+20, 40, 40);
-						
 						
 						for(int i = 0; i < arrow_circle_render_data_array.size(); i++){
 							drawArrow(g2, arrow_circle_render_data_array.get(i), true);
@@ -163,7 +161,7 @@ public class appWindow extends JFrame{
 	
 	public void arrowPreRenderCalculations(double angle_in_radians, double scale, int x, int y){
 		
-		// Arrowhead calculations
+	/*	// Arrowhead calculations
 		Point point1 = mathematics.point2x2MatrixMult(mathematics.similarityTransformationMatrix(angle_in_radians, scale), new Point(50, -20));
 		Point point2 = mathematics.point2x2MatrixMult(mathematics.similarityTransformationMatrix(angle_in_radians, scale), new Point(75, 0));
 		Point point3 = mathematics.point2x2MatrixMult(mathematics.similarityTransformationMatrix(angle_in_radians, scale), new Point(50, 20));
@@ -184,7 +182,52 @@ public class appWindow extends JFrame{
 		
 		arrowAndCircleRenderData data = new arrowAndCircleRenderData(x, y, arrowHead, body_arrow_connection, (int) scale*8, circleRadius); 
 		
+		
 		arrow_circle_render_data_array.add(data);
+	*/
+		arrowAndCircleRenderData arrow = calculateArrow(new complexNumber(Math.sqrt(this.x*this.x + this.y+this.y)/2000, testAngle, false), 0, this.x, this.y);
+		
+		ArrayList<arrowAndCircleRenderData> test = new ArrayList<arrowAndCircleRenderData>();
+		test.add(arrow);
+		arrow_circle_render_data_array = test;
+	}
+	
+	public arrowAndCircleRenderData calculateArrow(complexNumber complex_value, int index, int x, int y){
+		// Calculate the magnitude of the arrow in unit of pixels
+		double complex_magnitude = complex_value.getMagnitude();
+		double pixel_magnitude = mathematics.complexMagnitudeToPixelMagnitude(complex_magnitude);
+		
+		// Calculate the angle of the arrow
+		double angle_in_radians = complex_value.getArgument();
+		
+		// Arrow proportions
+		double body_arrow_length = (2*pixel_magnitude)/3; // not getX, should be magnitude of complex number???
+		double head_arrow_x_length = pixel_magnitude/3;
+		double half_head_arrow_y_length = 0.8*head_arrow_x_length; // Could calculate these once and save them as to not calculate them over and over???
+		
+		// Arrowhead calculations
+		Point point1 = mathematics.point2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point((int) body_arrow_length, (int) -half_head_arrow_y_length));
+		Point point2 = mathematics.point2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point((int) (body_arrow_length+head_arrow_x_length), 0));
+		Point point3 = mathematics.point2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point((int) body_arrow_length, (int) half_head_arrow_y_length));
+		point1 = new Point(point1.x+x, point1.y+y);
+		point2 = new Point(point2.x+x, point2.y+y);
+		point3 = new Point(point3.x+x, point3.y+y);
+				
+		int[] xPoints = {point1.x, point2.x, point3.x};
+		int[] yPoints = {point1.y, point2.y, point3.y};
+		Polygon arrowHead = new Polygon(xPoints, yPoints, 3);
+		
+		// Arrow body calculations
+		Point body_arrow_connection = mathematics.point2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point((int) body_arrow_length, 0));
+		body_arrow_connection = new Point(body_arrow_connection.x+x, body_arrow_connection.y+y);
+		float arrow_body_stroke = (float) (0.16*body_arrow_length);
+		
+		// Circle radius calculations
+		int circleRadius = (int) (body_arrow_length + head_arrow_x_length);
+		
+		arrowAndCircleRenderData data = new arrowAndCircleRenderData(x, y, arrowHead, body_arrow_connection, arrow_body_stroke, circleRadius); 
+		
+		return data;
 	}
 	
 	public void drawArrow(Graphics2D g2, arrowAndCircleRenderData renderData, boolean showRotationCircle) {
