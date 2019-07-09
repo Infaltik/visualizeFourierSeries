@@ -35,6 +35,7 @@ public class appWindow extends JFrame{
 	public static final int DRAWING_IMAGE = 1;
 	public static final int RENDERING_FOURIER_ANIMATION = 2;
 	public static double testAngle = 0;
+	int testCount = 0;
 
 	public appWindow(String window_title) {
 		
@@ -188,7 +189,11 @@ public class appWindow extends JFrame{
 		
 		arrow_circle_render_data_array.add(data);
 	*/
-		arrowAndCircleRenderData arrow = calculateArrow(new complexNumber(Math.sqrt(this.x*this.x + this.y+this.y)/2000, testAngle, false), 0, this.x, this.y);
+		//arrowAndCircleRenderData arrow = calculateArrow(new complexNumber(Math.sqrt(this.x*this.x + this.y+this.y)/2000, testAngle, false), 0, this.x, this.y);
+		arrowAndCircleRenderData arrow = calculateArrow(mathematics.pixelToComplexNumber(drawn_image_array.get(testCount)), 0, mathematics.originPixelX, mathematics.originPixelY);
+		if(testCount < drawn_image_array.size()-1) {
+			testCount++;
+		}
 		
 		ArrayList<arrowAndCircleRenderData> test = new ArrayList<arrowAndCircleRenderData>();
 		test.add(arrow);
@@ -212,9 +217,9 @@ public class appWindow extends JFrame{
 		Point point1 = mathematics.point2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point((int) body_arrow_length, (int) -half_head_arrow_y_length));
 		Point point2 = mathematics.point2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point((int) (body_arrow_length+head_arrow_x_length), 0));
 		Point point3 = mathematics.point2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point((int) body_arrow_length, (int) half_head_arrow_y_length));
-		point1 = new Point(point1.x+x, point1.y+y);
-		point2 = new Point(point2.x+x, point2.y+y);
-		point3 = new Point(point3.x+x, point3.y+y);
+		point1 = new Point(point1.x+x, -point1.y+y);
+		point2 = new Point(point2.x+x, -point2.y+y);
+		point3 = new Point(point3.x+x, -point3.y+y);
 				
 		int[] xPoints = {point1.x, point2.x, point3.x};
 		int[] yPoints = {point1.y, point2.y, point3.y};
@@ -222,7 +227,7 @@ public class appWindow extends JFrame{
 		
 		// Arrow body calculations
 		Point body_arrow_connection = mathematics.point2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point((int) body_arrow_length, 0));
-		body_arrow_connection = new Point(body_arrow_connection.x+x, body_arrow_connection.y+y);
+		body_arrow_connection = new Point(body_arrow_connection.x+x, -body_arrow_connection.y+y);
 		float arrow_body_stroke = (float) (0.16*body_arrow_length);
 		
 		// Circle radius calculations
