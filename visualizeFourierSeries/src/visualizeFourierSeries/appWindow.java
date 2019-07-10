@@ -190,17 +190,33 @@ public class appWindow extends JFrame{
 		arrow_circle_render_data_array.add(data);
 	*/
 		//arrowAndCircleRenderData arrow = calculateArrow(new complexNumber(Math.sqrt(this.x*this.x + this.y+this.y)/2000, testAngle, false), 0, this.x, this.y);
-		arrowAndCircleRenderData arrow = calculateArrow(mathematics.pixelToComplexNumber(drawn_image_array.get(testCount)), 0, mathematics.originPixelX, mathematics.originPixelY);
+		
+		if(testCount == 0){
+			arrowAndCircleRenderData arrow = calculateArrow(mathematics.pixelToComplexNumber(drawn_image_array.get(testCount)), 0, mathematics.originPixelX, mathematics.originPixelY);
+			arrow_circle_render_data_array.add(arrow);
+			arrowAndCircleRenderData arrow2 = calculateArrow(new complexNumber(0.8,0), 1, mathematics.originPixelX, mathematics.originPixelY);
+			arrow_circle_render_data_array.add(arrow2);
+		}
 		if(testCount < drawn_image_array.size()-1) {
 			testCount++;
 		}
 		
-		ArrayList<arrowAndCircleRenderData> test = new ArrayList<arrowAndCircleRenderData>();
-		test.add(arrow);
-		arrow_circle_render_data_array = test;
+		//ArrayList<arrowAndCircleRenderData> test = new ArrayList<arrowAndCircleRenderData>();
+		//test.add(arrow);
+		//arrow_circle_render_data_array = test;
 	}
 	
-	public arrowAndCircleRenderData calculateArrow(complexNumber complex_value, int index, int x, int y){
+	public arrowAndCircleRenderData calculateArrow(complexNumber complex_value, int shift_index, int x, int y){
+		// The offset the arrow should be translated
+		int x_translation = x;
+		int y_translation = y;
+		if(shift_index != 0){
+			int vector_sum_index = mathematics.shiftIndexToVectorSumIndex(shift_index);
+			Point previous_end_point = arrow_circle_render_data_array.get(vector_sum_index-1).getArrowEndPoint();
+			x_translation = previous_end_point.x;
+			y_translation = previous_end_point.y;
+		}
+		
 		// Calculate the magnitude of the arrow in unit of pixels
 		double complex_magnitude = complex_value.getMagnitude();
 		double pixel_magnitude = mathematics.complexMagnitudeToPixelMagnitude(complex_magnitude);
@@ -217,9 +233,9 @@ public class appWindow extends JFrame{
 		Point point1 = mathematics.point2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point((int) body_arrow_length, (int) -half_head_arrow_y_length));
 		Point point2 = mathematics.point2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point((int) (body_arrow_length+head_arrow_x_length), 0));
 		Point point3 = mathematics.point2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point((int) body_arrow_length, (int) half_head_arrow_y_length));
-		point1 = new Point(point1.x+x, -point1.y+y);
-		point2 = new Point(point2.x+x, -point2.y+y);
-		point3 = new Point(point3.x+x, -point3.y+y);
+		point1 = new Point(point1.x+x_translation, -point1.y+y_translation);
+		point2 = new Point(point2.x+x_translation, -point2.y+y_translation);
+		point3 = new Point(point3.x+x_translation, -point3.y+y_translation);
 				
 		int[] xPoints = {point1.x, point2.x, point3.x};
 		int[] yPoints = {point1.y, point2.y, point3.y};
@@ -227,13 +243,13 @@ public class appWindow extends JFrame{
 		
 		// Arrow body calculations
 		Point body_arrow_connection = mathematics.point2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point((int) body_arrow_length, 0));
-		body_arrow_connection = new Point(body_arrow_connection.x+x, -body_arrow_connection.y+y);
+		body_arrow_connection = new Point(body_arrow_connection.x+x_translation, -body_arrow_connection.y+y_translation);
 		float arrow_body_stroke = (float) (0.16*body_arrow_length);
 		
 		// Circle radius calculations
 		int circleRadius = (int) (body_arrow_length + head_arrow_x_length);
 		
-		arrowAndCircleRenderData data = new arrowAndCircleRenderData(x, y, arrowHead, body_arrow_connection, arrow_body_stroke, circleRadius); 
+		arrowAndCircleRenderData data = new arrowAndCircleRenderData(x_translation, y_translation, point2, arrowHead, body_arrow_connection, arrow_body_stroke, circleRadius); 
 		
 		return data;
 	}

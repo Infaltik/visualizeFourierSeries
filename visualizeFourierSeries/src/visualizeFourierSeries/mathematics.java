@@ -14,11 +14,10 @@ public class mathematics {
 	
 	
 	public static void calculateFourierSeriesCoefficients(){
-		int[] shifting_indices_array = createShiftIndices();
-		for(int i = 0; i < shifting_indices_array.length; i++){
-			calculateIntegralNumerically(shifting_indices_array[i]);
+		int[] shift_indices_array = createShiftIndices();
+		for(int i = 0; i < shift_indices_array.length; i++){
+			calculateIntegralNumerically(shift_indices_array[i]);
 		}
-		
 	}
 	
 	public static void calculateIntegralNumerically(int shifting_index){
@@ -59,6 +58,22 @@ public class mathematics {
 		}
 		
 		return shifting_indices_array;
+	}
+	
+	public static int shiftIndexToVectorSumIndex(int shift_index){
+		// Shift index to the index the vector has in the vector sum. E.g. Shift index
+		// -1 should be added as the third term in the vector sum and therefore has
+		// vector sum index 2.
+		
+		int vector_sum_index = 0;
+		if(shift_index > 0){
+			vector_sum_index = shift_index*2-1;
+		}
+		else if(shift_index < 0){
+			vector_sum_index = Math.abs(shift_index)*2;
+		}
+		
+		return vector_sum_index;
 	}
 	
 	public static complexNumber complexExponentialFunction(double input){

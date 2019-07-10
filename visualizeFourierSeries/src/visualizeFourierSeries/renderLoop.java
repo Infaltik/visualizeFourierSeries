@@ -2,7 +2,7 @@ package visualizeFourierSeries;
 
 public class renderLoop implements Runnable{
 	
-	final int TARGET_FPS = 140;
+	final int TARGET_FPS = 144;
 	final long RENDER_WAIT_TIME = 1000000000/TARGET_FPS;
 	
 	public void run(){
