@@ -12,6 +12,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.geom.Point2D;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
@@ -80,8 +81,8 @@ public class appWindow extends JFrame{
 						
 					case RENDERING_FOURIER_ANIMATION:
 						this.setBackground(new Color(Math.max(x/10, 0), Math.max(y/10, 0), 0));
-						g2.setColor(Color.red);
 						
+						g2.setColor(Color.red);
 						for(int i = 0; i < arrow_circle_render_data_array.size(); i++){
 							drawArrow(g2, arrow_circle_render_data_array.get(i), true);
 						}
@@ -96,6 +97,12 @@ public class appWindow extends JFrame{
 						this.setBackground(Color.BLACK);
 						break;
 				}
+				
+				Color color = new Color(0, 0, 0, (float) 0.5); 
+				g2.setPaint(color);
+				g2.setStroke(new BasicStroke(1));
+				g2.drawLine(mathematics.originPixelX, mathematics.originPixelY-5, mathematics.originPixelX, mathematics.originPixelY+5);
+				g2.drawLine(mathematics.originPixelX-5, mathematics.originPixelY, mathematics.originPixelX+5, mathematics.originPixelY);
 				
 				
 			}
@@ -272,36 +279,39 @@ public class appWindow extends JFrame{
 		double angle_in_radians = complex_value.getArgument();
 				
 		// Arrow proportions
-		double head_arrow_x_length = pixel_magnitude/3;
+		double head_arrow_x_length = Math.max(pixel_magnitude/3, 1);
 		double head_arrow_half_y_length = 0.8*head_arrow_x_length; // Could calculate these once and save them as to not calculate them over and over???
-		double body_arrow_x_length = (2*pixel_magnitude)/3;
-		double body_arrow_half_y_length = 0.2*head_arrow_half_y_length;
+		double body_arrow_x_length = Math.max((2*pixel_magnitude)/3, 1);
+		double body_arrow_half_y_length = Math.max(0.2*head_arrow_half_y_length, 0.49);
 		
 		// Arrowhead calculations
-		Point point1 = mathematics.point2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point( (int) body_arrow_x_length, (int) -head_arrow_half_y_length ));
-		Point point2 = mathematics.point2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point( (int) (body_arrow_x_length+head_arrow_x_length), 0 ));
-		Point point3 = mathematics.point2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point( (int) body_arrow_x_length, (int) head_arrow_half_y_length ));
-		Point point4 = mathematics.point2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point( (int) body_arrow_x_length, (int) body_arrow_half_y_length ));
-		Point point5 = mathematics.point2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point( 0, (int) body_arrow_half_y_length ));
-		Point point6 = mathematics.point2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point( 0, (int) -body_arrow_half_y_length ));
-		Point point7 = mathematics.point2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point( (int) body_arrow_x_length, (int) -body_arrow_half_y_length ));
+		Point2D.Double point1 = mathematics.pointDouble2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point2D.Double( body_arrow_x_length, -head_arrow_half_y_length ));
+		Point2D.Double point2 = mathematics.pointDouble2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point2D.Double( (body_arrow_x_length+head_arrow_x_length), 0 ));
+		Point2D.Double point3 = mathematics.pointDouble2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point2D.Double( body_arrow_x_length, head_arrow_half_y_length ));
+		Point2D.Double point4 = mathematics.pointDouble2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point2D.Double( body_arrow_x_length, body_arrow_half_y_length ));
+		Point2D.Double point5 = mathematics.pointDouble2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point2D.Double( 0, body_arrow_half_y_length ));
+		Point2D.Double point6 = mathematics.pointDouble2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point2D.Double( 0, -body_arrow_half_y_length ));
+		Point2D.Double point7 = mathematics.pointDouble2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point2D.Double( body_arrow_x_length, -body_arrow_half_y_length ));
 		
-		point1 = new Point(point1.x+x_translation, -point1.y+y_translation);
-		point2 = new Point(point2.x+x_translation, -point2.y+y_translation);
-		point3 = new Point(point3.x+x_translation, -point3.y+y_translation);
-		point4 = new Point(point4.x+x_translation, -point4.y+y_translation);
-		point5 = new Point(point5.x+x_translation, -point5.y+y_translation);
-		point6 = new Point(point6.x+x_translation, -point6.y+y_translation);
-		point7 = new Point(point7.x+x_translation, -point7.y+y_translation);
+		point1 = new Point2D.Double(point1.x+x_translation, -point1.y+y_translation);
+		point2 = new Point2D.Double(point2.x+x_translation, -point2.y+y_translation);
+		point3 = new Point2D.Double(point3.x+x_translation, -point3.y+y_translation);
+		point4 = new Point2D.Double(point4.x+x_translation, -point4.y+y_translation);
+		point5 = new Point2D.Double(point5.x+x_translation, -point5.y+y_translation);
+		point6 = new Point2D.Double(point6.x+x_translation, -point6.y+y_translation);
+		point7 = new Point2D.Double(point7.x+x_translation, -point7.y+y_translation);
 						
-		int[] xPoints = {point1.x, point2.x, point3.x, point4.x, point5.x, point6.x, point7.x};
-		int[] yPoints = {point1.y, point2.y, point3.y, point4.y, point5.y, point6.y, point7.y};
+		int[] xPoints = {(int) Math.round(point1.x), (int) Math.round(point2.x), (int) Math.round(point3.x), 
+				(int) Math.round(point4.x), (int) Math.round(point5.x), (int) Math.round(point6.x), (int) Math.round(point7.x)};
+		int[] yPoints = {(int) Math.round(point1.y), (int) Math.round(point2.y), (int) Math.round(point3.y), 
+				(int) Math.round(point4.y), (int) Math.round(point5.y), (int) Math.round(point6.y), (int) Math.round(point7.y)};
 		Polygon arrow_polygon = new Polygon(xPoints, yPoints, 7);
 				
 		// Circle radius calculations
 		int circle_radius = (int) pixel_magnitude;
-				
-		arrowAndCircleRenderData data = new arrowAndCircleRenderData(x_translation, y_translation, point2, arrow_polygon, circle_radius);
+		
+		Point arrow_end_point = new Point( (int) Math.round(point2.x), (int) Math.round(point2.y));
+		arrowAndCircleRenderData data = new arrowAndCircleRenderData(x_translation, y_translation, arrow_end_point, arrow_polygon, circle_radius);
 		
 		return data;
 	}

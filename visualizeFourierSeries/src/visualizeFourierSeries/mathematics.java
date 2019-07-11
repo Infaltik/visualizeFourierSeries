@@ -1,6 +1,7 @@
 package visualizeFourierSeries;
 
 import java.awt.Point;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 public class mathematics {
@@ -151,6 +152,13 @@ public class mathematics {
 		int y = (int) (matrix[1][0]*point.getX() + matrix[1][1]*point.getY());
 		
 		return new Point(x, y);
+	}
+	
+	public static Point2D.Double pointDouble2x2MatrixMult(double[][] matrix, Point2D.Double point){
+		double x = matrix[0][0]*point.getX() + matrix[0][1]*point.getY();
+		double y = matrix[1][0]*point.getX() + matrix[1][1]*point.getY();
+		
+		return new Point2D.Double(x, y);
 	}
 	
 	public static double[][] matrixMultiplication2x2(double[][] A, double[][] B) {

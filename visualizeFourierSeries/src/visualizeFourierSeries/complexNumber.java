@@ -44,5 +44,10 @@ public class complexNumber {
 	public void setImagPart(double imag) {
 		imag_part = imag;
 	}
+	
+	public String toString() {
+		String s = "complexNumber[" + real_part + ", " + imag_part + "i]";
+		return s;
+	}
 
 }
