@@ -23,6 +23,15 @@ public class arrowAndCircleRenderData {
 		circle_radius = circ_radius;
 	}
 	
+	public arrowAndCircleRenderData(int x, int y, Point arrow_end_pnt, Polygon arrow_head_poly, int circ_radius){
+		x_pixel_coordinate = x;
+		y_pixel_coordinate = y;
+		arrow_end_point = arrow_end_pnt;
+		arrow_head_polygon = arrow_head_poly;
+		circle_radius = circ_radius;
+	}
+	
+	
 	public int getX(){
 		return x_pixel_coordinate;
 	}
