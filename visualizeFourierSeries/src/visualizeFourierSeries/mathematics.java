@@ -11,17 +11,29 @@ public class mathematics {
 	public static int originPixelX = appWindow.rendering_panel_width/2;
 	public static int originPixelY = appWindow.rendering_panel_height/2;
 	public static int pixelNormalizingFactor = originPixelY;
+	public static int[] shifting_indices_array;
+	
+	public static complexNumber fourier_series_coefficients[] = new complexNumber[nbr_of_fourier_terms];
+	public static complexNumber fourier_series_terms[] = new complexNumber[nbr_of_fourier_terms];
 	
 	
+	public static void calculateFourierSeriesTerms(double independent_variable){
+		for(int i = 0; i < nbr_of_fourier_terms; i++){
+			complexNumber exponential_factor = complexExponentialFunction(shifting_indices_array[i]*2*Math.PI*independent_variable);
+			complexNumber current_series_term = complexMultiplication(fourier_series_coefficients[i], exponential_factor);
+			fourier_series_terms[i] = current_series_term;
+		}
+	}
 	
 	public static void calculateFourierSeriesCoefficients(){
 		int[] shift_indices_array = createShiftIndices();
 		for(int i = 0; i < shift_indices_array.length; i++){
-			calculateIntegralNumerically(shift_indices_array[i]);
+			complexNumber current_coefficient = calculateIntegralNumerically(shift_indices_array[i]);
+			fourier_series_coefficients[i] = current_coefficient;
 		}
 	}
 	
-	public static void calculateIntegralNumerically(int shifting_index){
+	public static complexNumber calculateIntegralNumerically(int shifting_index){
 		int array_length = complexFunctionToApproximate.length;
 		double delta_t = 1.0/array_length;
 		
@@ -37,8 +49,7 @@ public class mathematics {
 		// Multiply by the infinitesimal factor in the integral
 		res = new complexNumber(res.getRealPart()*delta_t, res.getImagPart()*delta_t);
 		
-		System.out.println(res.getRealPart());
-		System.out.println(res.getImagPart());
+		return res;
 	}
 	
 	public static int[] createShiftIndices(){
@@ -47,7 +58,7 @@ public class mathematics {
 			return null;
 		}
 		
-		int[] shifting_indices_array = new int[nbr_of_fourier_terms];
+		shifting_indices_array = new int[nbr_of_fourier_terms];
 		shifting_indices_array[0] = 0;
 		
 		int count = 0;

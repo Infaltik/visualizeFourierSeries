@@ -8,26 +8,14 @@ public class arrowAndCircleRenderData {
 	private int x_pixel_coordinate;
 	private int y_pixel_coordinate;
 	private Point arrow_end_point;
-	private Polygon arrow_head_polygon;
-	private Point body_arrow_connection;
-	private float arrow_body_stroke;
+	private Polygon arrow_polygon;
 	private int circle_radius;
 	
-	public arrowAndCircleRenderData(int x, int y, Point arrow_end_pnt, Polygon arrow_head_poly, Point body_arrow_con, float arrow_body_str, int circ_radius){
+	public arrowAndCircleRenderData(int x, int y, Point arrow_end_pnt, Polygon arrow_poly, int circ_radius){
 		x_pixel_coordinate = x;
 		y_pixel_coordinate = y;
 		arrow_end_point = arrow_end_pnt;
-		arrow_head_polygon = arrow_head_poly;
-		body_arrow_connection = body_arrow_con;
-		arrow_body_stroke = arrow_body_str;
-		circle_radius = circ_radius;
-	}
-	
-	public arrowAndCircleRenderData(int x, int y, Point arrow_end_pnt, Polygon arrow_head_poly, int circ_radius){
-		x_pixel_coordinate = x;
-		y_pixel_coordinate = y;
-		arrow_end_point = arrow_end_pnt;
-		arrow_head_polygon = arrow_head_poly;
+		arrow_polygon = arrow_poly;
 		circle_radius = circ_radius;
 	}
 	
@@ -45,15 +33,7 @@ public class arrowAndCircleRenderData {
 	}
 	
 	public Polygon getArrowHeadPolygon(){
-		return arrow_head_polygon;
-	}
-	
-	public Point getBodyArrowConnection(){
-		return body_arrow_connection;
-	}
-	
-	public float getArrowBodyStroke(){
-		return arrow_body_stroke;
+		return arrow_polygon;
 	}
 	
 	public int getCircleRadius(){

@@ -29,6 +29,7 @@ public class appWindow extends JFrame{
 	int x = 0, y = 0;
 	int prev_x = 0, prev_y = 0;
 	ArrayList<Point> drawn_image_array = new ArrayList<Point>();
+	ArrayList<Point> fourier_series_drawn_image_array = new ArrayList<Point>();
 	ArrayList<arrowAndCircleRenderData> arrow_circle_render_data_array = new ArrayList<arrowAndCircleRenderData>();
 	int current_app_status = 1;
 	
@@ -37,6 +38,7 @@ public class appWindow extends JFrame{
 	public static final int RENDERING_FOURIER_ANIMATION = 2;
 	public static double testAngle = 0;
 	int testCount = 0;
+	boolean arrow_calculations_done = false;
 
 	public appWindow(String window_title) {
 		
@@ -80,11 +82,24 @@ public class appWindow extends JFrame{
 						break;
 						
 					case RENDERING_FOURIER_ANIMATION:
-						this.setBackground(new Color(Math.max(x/10, 0), Math.max(y/10, 0), 0));
+						this.setBackground(Color.black);
 						
 						g2.setColor(Color.red);
 						for(int i = 0; i < arrow_circle_render_data_array.size(); i++){
 							drawArrow(g2, arrow_circle_render_data_array.get(i), true);
+						}
+						
+						if(fourier_series_drawn_image_array.size() > 1){
+							for(int i = 0; i < fourier_series_drawn_image_array.size()-1; i++) {
+								
+								int current_x = (int) fourier_series_drawn_image_array.get(i).getX();
+								int current_y = (int) fourier_series_drawn_image_array.get(i).getY();
+								int next_x = (int) fourier_series_drawn_image_array.get(i+1).getX();
+								int next_y = (int) fourier_series_drawn_image_array.get(i+1).getY();
+								
+								g2.setStroke(new BasicStroke(5));
+								g2.drawLine(current_x, current_y, next_x, next_y);
+							}
 						}
 					//	drawArrow(g2, testAngle, 0.4, 650, 500, false);
 					//	drawArrow(g2, testAngle+0.5, 0.2, 700, 500, false);
@@ -170,97 +185,32 @@ public class appWindow extends JFrame{
 		this.setVisible(true);
 	}
 	
-	public void arrowPreRenderCalculations(double angle_in_radians, double scale, int x, int y){
+	public void arrowPreRenderCalculations(double angle_in_radians){
+
+		arrow_circle_render_data_array.clear();
+		ArrayList<arrowAndCircleRenderData> current_arrows_array = new ArrayList<arrowAndCircleRenderData>();
+		for(int i = 0; i < mathematics.nbr_of_fourier_terms; i++){
+			arrowAndCircleRenderData current_arrow = calculateArrow(mathematics.fourier_series_terms[i], mathematics.shifting_indices_array[i]);
+			arrow_circle_render_data_array.add(current_arrow);
+		}
 		
-	/*	// Arrowhead calculations
-		Point point1 = mathematics.point2x2MatrixMult(mathematics.similarityTransformationMatrix(angle_in_radians, scale), new Point(50, -20));
-		Point point2 = mathematics.point2x2MatrixMult(mathematics.similarityTransformationMatrix(angle_in_radians, scale), new Point(75, 0));
-		Point point3 = mathematics.point2x2MatrixMult(mathematics.similarityTransformationMatrix(angle_in_radians, scale), new Point(50, 20));
-		point1 = new Point(point1.x+x, point1.y+y);
-		point2 = new Point(point2.x+x, point2.y+y);
-		point3 = new Point(point3.x+x, point3.y+y);
-		
-		int[] xPoints = {point1.x, point2.x, point3.x};
-		int[] yPoints = {point1.y, point2.y, point3.y};
-		Polygon arrowHead = new Polygon(xPoints, yPoints, 3);
-		
-		// Arrow body calculations
-		Point body_arrow_connection = mathematics.point2x2MatrixMult(mathematics.similarityTransformationMatrix(angle_in_radians, scale), new Point(50, 0));
-		body_arrow_connection = new Point(body_arrow_connection.x+x, body_arrow_connection.y+y);
-		
-		// Circle radius calculations
-		int circleRadius = (int) (scale*(50 + 25));
-		
-		arrowAndCircleRenderData data = new arrowAndCircleRenderData(x, y, arrowHead, body_arrow_connection, (int) scale*8, circleRadius); 
-		
-		
-		arrow_circle_render_data_array.add(data);
-	*/
-		//arrowAndCircleRenderData arrow = calculateArrow(new complexNumber(Math.sqrt(this.x*this.x + this.y+this.y)/2000, testAngle, false), 0, this.x, this.y);
-		
-		if(testCount == 0){
-			arrowAndCircleRenderData arrow = calculateArrow2(mathematics.pixelToComplexNumber(drawn_image_array.get(testCount)), 0);
+	/*	if(testCount == 0){
+			arrowAndCircleRenderData arrow = calculateArrow(mathematics.pixelToComplexNumber(drawn_image_array.get(testCount)), 0);
 			arrow_circle_render_data_array.add(arrow);
-			arrowAndCircleRenderData arrow2 = calculateArrow2(new complexNumber(0.8,0), 1);
+			arrowAndCircleRenderData arrow2 = calculateArrow(new complexNumber(0.8,0), 1);
 			arrow_circle_render_data_array.add(arrow2);
 		}
 		if(testCount < drawn_image_array.size()-1) {
 			testCount++;
 		}
-		
+		*/
 		//ArrayList<arrowAndCircleRenderData> test = new ArrayList<arrowAndCircleRenderData>();
 		//test.add(arrow);
-		//arrow_circle_render_data_array = test;
+		//arrow_circle_render_data_array = current_arrows_array;
+		arrow_calculations_done = true;
 	}
 	
-	public arrowAndCircleRenderData calculateArrow(complexNumber complex_value, int shift_index, int x, int y){
-		// The offset the arrow should be translated
-		int x_translation = x;
-		int y_translation = y;
-		if(shift_index != 0){
-			int vector_sum_index = mathematics.shiftIndexToVectorSumIndex(shift_index);
-			Point previous_end_point = arrow_circle_render_data_array.get(vector_sum_index-1).getArrowEndPoint();
-			x_translation = previous_end_point.x;
-			y_translation = previous_end_point.y;
-		}
-		
-		// Calculate the magnitude of the arrow in unit of pixels
-		double complex_magnitude = complex_value.getMagnitude();
-		double pixel_magnitude = mathematics.complexMagnitudeToPixelMagnitude(complex_magnitude);
-		
-		// Calculate the angle of the arrow
-		double angle_in_radians = complex_value.getArgument();
-		
-		// Arrow proportions
-		double body_arrow_length = (2*pixel_magnitude)/3; // not getX, should be magnitude of complex number???
-		double head_arrow_x_length = pixel_magnitude/3;
-		double half_head_arrow_y_length = 0.8*head_arrow_x_length; // Could calculate these once and save them as to not calculate them over and over???
-		
-		// Arrowhead calculations
-		Point point1 = mathematics.point2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point((int) body_arrow_length, (int) -half_head_arrow_y_length));
-		Point point2 = mathematics.point2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point((int) (body_arrow_length+head_arrow_x_length), 0));
-		Point point3 = mathematics.point2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point((int) body_arrow_length, (int) half_head_arrow_y_length));
-		point1 = new Point(point1.x+x_translation, -point1.y+y_translation);
-		point2 = new Point(point2.x+x_translation, -point2.y+y_translation);
-		point3 = new Point(point3.x+x_translation, -point3.y+y_translation);
-				
-		int[] xPoints = {point1.x, point2.x, point3.x};
-		int[] yPoints = {point1.y, point2.y, point3.y};
-		Polygon arrowHead = new Polygon(xPoints, yPoints, 3);
-		
-		// Arrow body calculations
-		Point body_arrow_connection = mathematics.point2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point((int) body_arrow_length, 0));
-		body_arrow_connection = new Point(body_arrow_connection.x+x_translation, -body_arrow_connection.y+y_translation);
-		float arrow_body_stroke = (float) (0.16*body_arrow_length);
-		
-		// Circle radius calculations
-		int circleRadius = (int) (body_arrow_length + head_arrow_x_length);
-		
-		arrowAndCircleRenderData data = new arrowAndCircleRenderData(x_translation, y_translation, point2, arrowHead, body_arrow_connection, arrow_body_stroke, circleRadius); 
-		
-		return data;
-	}
-	public arrowAndCircleRenderData calculateArrow2(complexNumber complex_value, int shift_index){
+	public arrowAndCircleRenderData calculateArrow(complexNumber complex_value, int shift_index){
 		// The offset the arrow should be translated
 		int x_translation = mathematics.originPixelX;
 		int y_translation = mathematics.originPixelY;

@@ -6,6 +6,7 @@ public class Main {
 	
 	public static void main(String args[]) {
 		
+		mathematics.createShiftIndices();
 		app_window = new appWindow("Fourier Series Visualization");
 		
 	}
