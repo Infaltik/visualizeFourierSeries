@@ -23,23 +23,25 @@ import javax.swing.JPanel;
 
 public class appWindow extends JFrame{
 	
-	int drawing_brush_size = 5;
-	boolean show_target_function_in_animation = false;
+	private int drawing_brush_size = 5;
+	public double animation_drawing_speed = 0.2;
+	boolean show_target_function_in_animation = true;
 	JPanel rendering_panel;
 	public static int rendering_panel_width = 1400;
 	public static int rendering_panel_height = 1000; // atm the frame and rendering panel have the same size, need to add other containers
 									   // to have other size
-	int x = 0, y = 0;
-	int prev_x = 0, prev_y = 0;
+	private int x = 0, y = 0;
+	private int prev_x = 0, prev_y = 0;
 	ArrayList<Point> drawn_image_array = new ArrayList<Point>();
 	ArrayList<Point> fourier_series_drawn_image_array = new ArrayList<Point>();
 	ArrayList<arrowAndCircleRenderData> arrow_circle_render_data_array = new ArrayList<arrowAndCircleRenderData>();
-	int current_app_status = 1;
+	public int initial_drawn_image_array_size;
+	private int current_app_status = 1;
 	
 	// Different application status values
 	public static final int DRAWING_IMAGE = 1;
 	public static final int RENDERING_FOURIER_ANIMATION = 2;
-	int testCount = 0;
+	
 	boolean arrow_calculations_done = false;
 
 	public appWindow(String window_title) {
@@ -71,16 +73,7 @@ public class appWindow extends JFrame{
 							g2.drawString("Complex value: " + numberFormat.format(complex_value.getRealPart()) + "+" + numberFormat.format(Math.abs(complex_value.getImagPart())) + "i", 40, 80);
 						}
 						
-						for(int i = 0; i < drawn_image_array.size()-1; i++) {
-							
-							int current_x = (int) drawn_image_array.get(i).getX();
-							int current_y = (int) drawn_image_array.get(i).getY();
-							int next_x = (int) drawn_image_array.get(i+1).getX();
-							int next_y = (int) drawn_image_array.get(i+1).getY();
-							
-							g2.setStroke(new BasicStroke(drawing_brush_size));
-							g2.drawLine(current_x, current_y, next_x, next_y);
-						}
+						drawImageArray(g2, drawn_image_array, Color.black);
 						break;
 						
 					case RENDERING_FOURIER_ANIMATION:
@@ -88,20 +81,8 @@ public class appWindow extends JFrame{
 						
 						if(show_target_function_in_animation) {
 							// could be put in a function since similar code is used in the other switch-case
-							for(int i = 0; i < drawn_image_array.size()-1; i++) {
-								
-								int current_x = (int) drawn_image_array.get(i).getX();
-								int current_y = (int) drawn_image_array.get(i).getY();
-								int next_x = (int) drawn_image_array.get(i+1).getX();
-								int next_y = (int) drawn_image_array.get(i+1).getY();
-								
-								g2.setStroke(new BasicStroke(drawing_brush_size));
-								Color color1 = new Color(0, (float) 1, 0, (float) 0.4);
-								g2.setColor(color1);
-								g2.drawLine(current_x, current_y, next_x, next_y);
-								// Reset the stroke to default
-								g2.setStroke(new BasicStroke(1));
-							}
+							Color color1 = new Color(0, (float) 1, 0, (float) 0.4);
+							drawImageArray(g2, drawn_image_array, color1);
 						}
 						
 						
@@ -112,25 +93,8 @@ public class appWindow extends JFrame{
 						arrow_calculations_done = false;
 												
 						if(fourier_series_drawn_image_array.size() > 1){
-							for(int i = 0; i < fourier_series_drawn_image_array.size()-1; i++) {
-								
-								int current_x = (int) fourier_series_drawn_image_array.get(i).getX();
-								int current_y = (int) fourier_series_drawn_image_array.get(i).getY();
-								int next_x = (int) fourier_series_drawn_image_array.get(i+1).getX();
-								int next_y = (int) fourier_series_drawn_image_array.get(i+1).getY();
-								
-								g2.setStroke(new BasicStroke(drawing_brush_size));
-								g2.setColor(Color.red);
-								g2.drawLine(current_x, current_y, next_x, next_y);
-							}
+							drawImageArray(g2, fourier_series_drawn_image_array, Color.red);
 						}
-						
-						
-					//	drawArrow(g2, testAngle, 0.4, 650, 500, false);
-					//	drawArrow(g2, testAngle+0.5, 0.2, 700, 500, false);
-						
-					//	g2.setColor(Color.BLUE);
-					//	g2.fillRect(625, 475, 50, 50);
 						
 						break;
 					default:
@@ -200,6 +164,7 @@ public class appWindow extends JFrame{
 					
 					mathematics.convertToComplexAndStoreFunction(drawn_image_array);
 					System.out.println(mathematics.complexFunctionToApproximate.length);
+					initial_drawn_image_array_size = drawn_image_array.size();
 					for(int i = 1; i <= 5; i++) {
 						mathematics.addMoreSamplesToFunction();
 						System.out.println("done" + i);
@@ -230,19 +195,6 @@ public class appWindow extends JFrame{
 			arrow_circle_render_data_array.add(current_arrow);
 		}
 		
-	/*	if(testCount == 0){
-			arrowAndCircleRenderData arrow = calculateArrow(mathematics.pixelToComplexNumber(drawn_image_array.get(testCount)), 0);
-			arrow_circle_render_data_array.add(arrow);
-			arrowAndCircleRenderData arrow2 = calculateArrow(new complexNumber(0.8,0), 1);
-			arrow_circle_render_data_array.add(arrow2);
-		}
-		if(testCount < drawn_image_array.size()-1) {
-			testCount++;
-		}
-		*/
-		//ArrayList<arrowAndCircleRenderData> test = new ArrayList<arrowAndCircleRenderData>();
-		//test.add(arrow);
-		//arrow_circle_render_data_array = current_arrows_array;
 		arrow_calculations_done = true;
 	}
 	
@@ -265,10 +217,10 @@ public class appWindow extends JFrame{
 		double angle_in_radians = complex_value.getArgument();
 				
 		// Arrow proportions
-		double head_arrow_x_length = Math.max(pixel_magnitude/3, 0);
+		double head_arrow_x_length = pixel_magnitude/3;
 		double head_arrow_half_y_length = 0.8*head_arrow_x_length; // Could calculate these once and save them as to not calculate them over and over???
-		double body_arrow_x_length = Math.max((2*pixel_magnitude)/3, 0);
-		double body_arrow_half_y_length = Math.max(0.2*head_arrow_half_y_length, 0);
+		double body_arrow_x_length = (2*pixel_magnitude)/3;
+		double body_arrow_half_y_length = 0.2*head_arrow_half_y_length;
 		
 		// Arrowhead calculations
 		Point2D.Double point1 = mathematics.pointDouble2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point2D.Double( body_arrow_x_length, -head_arrow_half_y_length ));
@@ -307,7 +259,6 @@ public class appWindow extends JFrame{
 		int circleRadius = renderData.getCircleRadius();
 		int x_pos = renderData.getX();
 		int y_pos = renderData.getY();
-//		Point body_arrow_connection = renderData.getBodyArrowConnection();
 		
 		g2.setStroke(new BasicStroke(2));
 		if(showRotationCircle){
@@ -315,9 +266,23 @@ public class appWindow extends JFrame{
 		}
 		
 		g2.fill(renderData.getArrowHeadPolygon());
-	//	g2.setStroke(new BasicStroke(renderData.getArrowBodyStroke()));
-	//	g2.drawLine(x_pos, y_pos, body_arrow_connection.x, body_arrow_connection.y);
 	//	g2.setStroke(new BasicStroke(1)); // Reset the stroke to default
+	}
+	
+	public void drawImageArray(Graphics2D g2, ArrayList<Point> image_array, Color color){
+		for(int i = 0; i < image_array.size()-1; i++) {
+			
+			int current_x = (int) image_array.get(i).getX();
+			int current_y = (int) image_array.get(i).getY();
+			int next_x = (int) image_array.get(i+1).getX();
+			int next_y = (int) image_array.get(i+1).getY();
+			
+			g2.setStroke(new BasicStroke(drawing_brush_size));
+			g2.setColor(color);
+			g2.drawLine(current_x, current_y, next_x, next_y);
+			// Reset the stroke to default
+			g2.setStroke(new BasicStroke(1));
+		}
 	}
 	
 	public void render(){

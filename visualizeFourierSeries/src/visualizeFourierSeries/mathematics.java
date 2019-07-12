@@ -7,7 +7,7 @@ import java.util.Collections;
 
 public class mathematics {
 	
-	public static int nbr_of_fourier_terms = 2001;
+	public static int nbr_of_fourier_terms = 1001;
 	public static complexNumber[] complexFunctionToApproximate;
 	public static int originPixelX = appWindow.rendering_panel_width/2;
 	public static int originPixelY = appWindow.rendering_panel_height/2;
