@@ -12,7 +12,8 @@ public class renderLoop implements Runnable{
 		long last_time_rendered = System.nanoTime();
 		
 		
-		while(independent_variable < 1){
+		// Run the animation for one loop of the complex function
+		while(independent_variable <= 1){
 			long current_time = System.nanoTime();
 			long delta_render = current_time - last_time_rendered;
 			
@@ -21,10 +22,18 @@ public class renderLoop implements Runnable{
 			
 			if(!Main.app_window.arrow_calculations_done){
 				mathematics.calculateFourierSeriesTerms(independent_variable);
-				Main.app_window.arrowPreRenderCalculations(appWindow.testAngle);
+				Point end_point_pixel = mathematics.calculateEndPoint();
+				
+				
+				
+				Main.app_window.arrowPreRenderCalculations();
 				int array_size = Main.app_window.arrow_circle_render_data_array.size();
-				Point current_end_point = Main.app_window.arrow_circle_render_data_array.get(array_size-1	).getArrowEndPoint();
-				Main.app_window.fourier_series_drawn_image_array.add(current_end_point);
+				Point current_end_point = Main.app_window.arrow_circle_render_data_array.get(array_size-1).getArrowEndPoint();
+			//	Main.app_window.fourier_series_drawn_image_array.add(current_end_point);
+				Main.app_window.fourier_series_drawn_image_array.add(end_point_pixel);
+				
+				// Increase the function input value
+				independent_variable += 0.001;
 			}
 			
 			try {
@@ -37,12 +46,9 @@ public class renderLoop implements Runnable{
 			
 			if(delta_render >= RENDER_WAIT_TIME) {
 				last_time_rendered = System.nanoTime();
-				appWindow.testAngle += 0.01;
-				independent_variable += 0.001;
 				
 				if(Main.app_window.arrow_calculations_done){
 					Main.app_window.render(); // Render one frame
-					Main.app_window.arrow_calculations_done = false;
 				}
 			}
 			

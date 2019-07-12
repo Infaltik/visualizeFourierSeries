@@ -3,6 +3,7 @@ package visualizeFourierSeries;
 import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class mathematics {
 	
@@ -16,6 +17,15 @@ public class mathematics {
 	public static complexNumber fourier_series_coefficients[] = new complexNumber[nbr_of_fourier_terms];
 	public static complexNumber fourier_series_terms[] = new complexNumber[nbr_of_fourier_terms];
 	
+	
+	public static Point calculateEndPoint(){
+		complexNumber end_point_complex_number = new complexNumber(0,0);
+		for(int i = 0; i < nbr_of_fourier_terms; i++){
+			end_point_complex_number = complexAddition(end_point_complex_number, fourier_series_terms[i]);
+		}
+		Point end_point_pixel = complexNumberToPixel(end_point_complex_number);
+		return end_point_pixel;
+	}
 	
 	public static void calculateFourierSeriesTerms(double independent_variable){
 		for(int i = 0; i < nbr_of_fourier_terms; i++){
@@ -159,8 +169,8 @@ public class mathematics {
 	
 	public static Point complexNumberToPixel(complexNumber complex_number){
 		
-		int x_pixel = (int) (complex_number.getRealPart()*pixelNormalizingFactor + originPixelX);
-		int y_pixel = (int) (-complex_number.getImagPart()*pixelNormalizingFactor + originPixelY);
+		int x_pixel = (int) Math.round(complex_number.getRealPart()*pixelNormalizingFactor + originPixelX);
+		int y_pixel = (int) Math.round(-complex_number.getImagPart()*pixelNormalizingFactor + originPixelY);
 		
 		return new Point(x_pixel, y_pixel);
 	}

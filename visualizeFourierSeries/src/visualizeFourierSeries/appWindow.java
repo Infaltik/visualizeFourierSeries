@@ -15,6 +15,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -36,7 +37,6 @@ public class appWindow extends JFrame{
 	// Different application status values
 	public static final int DRAWING_IMAGE = 1;
 	public static final int RENDERING_FOURIER_ANIMATION = 2;
-	public static double testAngle = 0;
 	int testCount = 0;
 	boolean arrow_calculations_done = false;
 
@@ -84,11 +84,6 @@ public class appWindow extends JFrame{
 					case RENDERING_FOURIER_ANIMATION:
 						this.setBackground(Color.black);
 						
-						g2.setColor(Color.red);
-						for(int i = 0; i < arrow_circle_render_data_array.size(); i++){
-							drawArrow(g2, arrow_circle_render_data_array.get(i), true);
-						}
-						
 						// could be put in a function since similar code is used in the other switch-case
 						for(int i = 0; i < drawn_image_array.size()-1; i++) {
 							
@@ -101,8 +96,15 @@ public class appWindow extends JFrame{
 							Color color1 = new Color(0, (float) 1, 0, (float) 0.4);
 							g2.setColor(color1);
 							g2.drawLine(current_x, current_y, next_x, next_y);
+							g2.setStroke(new BasicStroke(1));
 						}
 						
+						g2.setColor(Color.white);
+						for(int i = 0; i < arrow_circle_render_data_array.size(); i++){
+							drawArrow(g2, arrow_circle_render_data_array.get(i), true);
+						}
+						arrow_calculations_done = false;
+												
 						if(fourier_series_drawn_image_array.size() > 1){
 							for(int i = 0; i < fourier_series_drawn_image_array.size()-1; i++) {
 								
@@ -116,6 +118,7 @@ public class appWindow extends JFrame{
 								g2.drawLine(current_x, current_y, next_x, next_y);
 							}
 						}
+						
 						
 					//	drawArrow(g2, testAngle, 0.4, 650, 500, false);
 					//	drawArrow(g2, testAngle+0.5, 0.2, 700, 500, false);
@@ -183,9 +186,15 @@ public class appWindow extends JFrame{
 				if(current_app_status == DRAWING_IMAGE){
 					System.out.println("Released mouse button");
 					current_app_status = 2;
+					
+					// Flip array so that the fourier series animation draws in the same
+					// direction as the drawer
+					Collections.reverse(drawn_image_array);
+					
+					
 					mathematics.convertToComplexAndStoreFunction(drawn_image_array);
 					System.out.println(mathematics.complexFunctionToApproximate.length);
-					for(int i = 1; i <= 1; i++) {
+					for(int i = 1; i <= 5; i++) {
 						mathematics.addMoreSamplesToFunction();
 						System.out.println("done" + i);
 					}
@@ -206,7 +215,7 @@ public class appWindow extends JFrame{
 		this.setVisible(true);
 	}
 	
-	public void arrowPreRenderCalculations(double angle_in_radians){
+	public void arrowPreRenderCalculations(){
 
 		arrow_circle_render_data_array.clear();
 		ArrayList<arrowAndCircleRenderData> current_arrows_array = new ArrayList<arrowAndCircleRenderData>();
@@ -294,6 +303,7 @@ public class appWindow extends JFrame{
 		int y_pos = renderData.getY();
 //		Point body_arrow_connection = renderData.getBodyArrowConnection();
 		
+		g2.setStroke(new BasicStroke(2));
 		if(showRotationCircle){
 			g2.drawOval(x_pos-circleRadius, y_pos-circleRadius, circleRadius*2, circleRadius*2);
 		}
