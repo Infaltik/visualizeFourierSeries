@@ -23,6 +23,8 @@ import javax.swing.JPanel;
 
 public class appWindow extends JFrame{
 	
+	int drawing_brush_size = 5;
+	boolean show_target_function_in_animation = false;
 	JPanel rendering_panel;
 	public static int rendering_panel_width = 1400;
 	public static int rendering_panel_height = 1000; // atm the frame and rendering panel have the same size, need to add other containers
@@ -76,7 +78,7 @@ public class appWindow extends JFrame{
 							int next_x = (int) drawn_image_array.get(i+1).getX();
 							int next_y = (int) drawn_image_array.get(i+1).getY();
 							
-							g2.setStroke(new BasicStroke(5));
+							g2.setStroke(new BasicStroke(drawing_brush_size));
 							g2.drawLine(current_x, current_y, next_x, next_y);
 						}
 						break;
@@ -84,20 +86,24 @@ public class appWindow extends JFrame{
 					case RENDERING_FOURIER_ANIMATION:
 						this.setBackground(Color.black);
 						
-						// could be put in a function since similar code is used in the other switch-case
-						for(int i = 0; i < drawn_image_array.size()-1; i++) {
-							
-							int current_x = (int) drawn_image_array.get(i).getX();
-							int current_y = (int) drawn_image_array.get(i).getY();
-							int next_x = (int) drawn_image_array.get(i+1).getX();
-							int next_y = (int) drawn_image_array.get(i+1).getY();
-							
-							g2.setStroke(new BasicStroke(5));
-							Color color1 = new Color(0, (float) 1, 0, (float) 0.4);
-							g2.setColor(color1);
-							g2.drawLine(current_x, current_y, next_x, next_y);
-							g2.setStroke(new BasicStroke(1));
+						if(show_target_function_in_animation) {
+							// could be put in a function since similar code is used in the other switch-case
+							for(int i = 0; i < drawn_image_array.size()-1; i++) {
+								
+								int current_x = (int) drawn_image_array.get(i).getX();
+								int current_y = (int) drawn_image_array.get(i).getY();
+								int next_x = (int) drawn_image_array.get(i+1).getX();
+								int next_y = (int) drawn_image_array.get(i+1).getY();
+								
+								g2.setStroke(new BasicStroke(drawing_brush_size));
+								Color color1 = new Color(0, (float) 1, 0, (float) 0.4);
+								g2.setColor(color1);
+								g2.drawLine(current_x, current_y, next_x, next_y);
+								// Reset the stroke to default
+								g2.setStroke(new BasicStroke(1));
+							}
 						}
+						
 						
 						g2.setColor(Color.white);
 						for(int i = 0; i < arrow_circle_render_data_array.size(); i++){
@@ -113,7 +119,7 @@ public class appWindow extends JFrame{
 								int next_x = (int) fourier_series_drawn_image_array.get(i+1).getX();
 								int next_y = (int) fourier_series_drawn_image_array.get(i+1).getY();
 								
-								g2.setStroke(new BasicStroke(5));
+								g2.setStroke(new BasicStroke(drawing_brush_size));
 								g2.setColor(Color.red);
 								g2.drawLine(current_x, current_y, next_x, next_y);
 							}
