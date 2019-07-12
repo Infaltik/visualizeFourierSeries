@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 public class mathematics {
 	
-	public static int nbr_of_fourier_terms = 101;
+	public static int nbr_of_fourier_terms = 2001;
 	public static complexNumber[] complexFunctionToApproximate;
 	public static int originPixelX = appWindow.rendering_panel_width/2;
 	public static int originPixelY = appWindow.rendering_panel_height/2;
@@ -50,6 +50,27 @@ public class mathematics {
 		res = new complexNumber(res.getRealPart()*delta_t, res.getImagPart()*delta_t);
 		
 		return res;
+	}
+	
+	public static void addMoreSamplesToFunction() {
+		int previous_array_length = complexFunctionToApproximate.length;
+		complexNumber[] new_function_array = new complexNumber[2*previous_array_length-1];
+		
+		int k = 0;
+		for(int i = 0; i < previous_array_length-1; i++) {
+			complexNumber prev_value = complexFunctionToApproximate[i];
+			complexNumber next_value = complexFunctionToApproximate[i+1];
+			new_function_array[k] = prev_value;
+			k++;
+			double delta_real = next_value.getRealPart() - prev_value.getRealPart();
+			double delta_imag = next_value.getImagPart() - prev_value.getImagPart();
+			new_function_array[k] = new complexNumber(prev_value.getRealPart() + delta_real/2, prev_value.getImagPart() + delta_imag/2);
+			k++;
+		}
+		
+		new_function_array[k] = complexFunctionToApproximate[previous_array_length-1];
+		
+		complexFunctionToApproximate = new_function_array;
 	}
 	
 	public static int[] createShiftIndices(){

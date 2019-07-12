@@ -89,6 +89,20 @@ public class appWindow extends JFrame{
 							drawArrow(g2, arrow_circle_render_data_array.get(i), true);
 						}
 						
+						// could be put in a function since similar code is used in the other switch-case
+						for(int i = 0; i < drawn_image_array.size()-1; i++) {
+							
+							int current_x = (int) drawn_image_array.get(i).getX();
+							int current_y = (int) drawn_image_array.get(i).getY();
+							int next_x = (int) drawn_image_array.get(i+1).getX();
+							int next_y = (int) drawn_image_array.get(i+1).getY();
+							
+							g2.setStroke(new BasicStroke(5));
+							Color color1 = new Color(0, (float) 1, 0, (float) 0.4);
+							g2.setColor(color1);
+							g2.drawLine(current_x, current_y, next_x, next_y);
+						}
+						
 						if(fourier_series_drawn_image_array.size() > 1){
 							for(int i = 0; i < fourier_series_drawn_image_array.size()-1; i++) {
 								
@@ -98,9 +112,11 @@ public class appWindow extends JFrame{
 								int next_y = (int) fourier_series_drawn_image_array.get(i+1).getY();
 								
 								g2.setStroke(new BasicStroke(5));
+								g2.setColor(Color.red);
 								g2.drawLine(current_x, current_y, next_x, next_y);
 							}
 						}
+						
 					//	drawArrow(g2, testAngle, 0.4, 650, 500, false);
 					//	drawArrow(g2, testAngle+0.5, 0.2, 700, 500, false);
 						
@@ -114,7 +130,7 @@ public class appWindow extends JFrame{
 				}
 				
 				Color color = new Color(0, 0, 0, (float) 0.5); 
-				g2.setPaint(color);
+				g2.setColor(color);
 				g2.setStroke(new BasicStroke(1));
 				g2.drawLine(mathematics.originPixelX, mathematics.originPixelY-5, mathematics.originPixelX, mathematics.originPixelY+5);
 				g2.drawLine(mathematics.originPixelX-5, mathematics.originPixelY, mathematics.originPixelX+5, mathematics.originPixelY);
@@ -168,6 +184,11 @@ public class appWindow extends JFrame{
 					System.out.println("Released mouse button");
 					current_app_status = 2;
 					mathematics.convertToComplexAndStoreFunction(drawn_image_array);
+					System.out.println(mathematics.complexFunctionToApproximate.length);
+					for(int i = 1; i <= 1; i++) {
+						mathematics.addMoreSamplesToFunction();
+						System.out.println("done" + i);
+					}
 					System.out.println(mathematics.complexFunctionToApproximate.length);
 					mathematics.calculateFourierSeriesCoefficients();
 					
@@ -229,10 +250,10 @@ public class appWindow extends JFrame{
 		double angle_in_radians = complex_value.getArgument();
 				
 		// Arrow proportions
-		double head_arrow_x_length = Math.max(pixel_magnitude/3, 1);
+		double head_arrow_x_length = Math.max(pixel_magnitude/3, 0);
 		double head_arrow_half_y_length = 0.8*head_arrow_x_length; // Could calculate these once and save them as to not calculate them over and over???
-		double body_arrow_x_length = Math.max((2*pixel_magnitude)/3, 1);
-		double body_arrow_half_y_length = Math.max(0.2*head_arrow_half_y_length, 0.49);
+		double body_arrow_x_length = Math.max((2*pixel_magnitude)/3, 0);
+		double body_arrow_half_y_length = Math.max(0.2*head_arrow_half_y_length, 0);
 		
 		// Arrowhead calculations
 		Point2D.Double point1 = mathematics.pointDouble2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point2D.Double( body_arrow_x_length, -head_arrow_half_y_length ));
