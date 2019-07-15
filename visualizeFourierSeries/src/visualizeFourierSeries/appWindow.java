@@ -25,7 +25,7 @@ public class appWindow extends JFrame{
 	
 	private int drawing_brush_size = 5;
 	public double animation_drawing_speed = 1.0;
-	boolean show_target_function_in_animation = false;
+	boolean show_target_function_in_animation = true;
 	JPanel rendering_panel;
 	public static int rendering_panel_width = 1400;
 	public static int rendering_panel_height = 1000; // atm the frame and rendering panel have the same size, need to add other containers
@@ -37,7 +37,7 @@ public class appWindow extends JFrame{
 	ArrayList<arrowAndCircleRenderData> arrow_circle_render_data_array = new ArrayList<arrowAndCircleRenderData>();
 	public int initial_drawn_image_array_size;
 	
-	private int current_app_status = 1;
+	private int current_app_status = 3;
 	// Different application status values
 	public static final int DRAWING_IMAGE = 1;
 	public static final int RENDERING_FOURIER_ANIMATION = 2;
@@ -101,7 +101,7 @@ public class appWindow extends JFrame{
 						drawOriginMarker(g2);
 						break;
 					case TRACING_INPUT_IMAGE:
-						g2.drawImage(imageInputFunctions.image, 200, 200, imageInputFunctions.image.getWidth(), imageInputFunctions.image.getHeight(), null);
+						g2.drawImage(imageInputFunctions.thresholdImageToBufferedImage(imageInputFunctions.normalized_image_array), 200, 200, imageInputFunctions.normalized_image_array.length, imageInputFunctions.normalized_image_array[0].length, null);
 						g2.drawImage(imageInputFunctions.input_image, 600, 200, imageInputFunctions.input_image.getWidth(), imageInputFunctions.input_image.getHeight(), null);
 						break;
 					default:

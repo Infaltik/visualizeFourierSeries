@@ -10,9 +10,9 @@ import javax.imageio.ImageIO;
 
 public class imageInputFunctions {
 	
-	public static ArrayList<Point> test_image_array = new ArrayList<Point>();
 	public static BufferedImage input_image;
-	public static BufferedImage image;
+	public static double[][] normalized_image_array;
+	public static BufferedImage output_image;
 	
 	public static void readImage(String filePath){
 		File file = new File(filePath);
@@ -20,32 +20,67 @@ public class imageInputFunctions {
 		
 		try {
 			input_image = ImageIO.read(file);
-			BufferedImage test_image = new BufferedImage(input_image.getWidth(), input_image.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
-			for(int y = 0; y < test_image.getHeight(); y++){
-				for(int x = 0; x < test_image.getWidth(); x++){
-					test_image.setRGB(x, y, -1);
-				}
-			}
-			
+			normalized_image_array = new double[input_image.getWidth()][input_image.getHeight()];
 			
 			for(int y = 0; y < input_image.getHeight(); y++){
 				for(int x = 0; x < input_image.getWidth(); x++){
-					//System.out.println(image.getRGB(x, y));
 					int pixel = input_image.getRGB(x, y);
-					if(Math.abs(pixel) > 3000000){
-						System.out.println(pixel + "   " + x + ", " + y);
-						test_image.setRGB(x, y, 0);
-						test_image_array.add(new Point(x, y));
-					}
+					int a = (pixel>>24)&0xff;
+					int r = (pixel>>16)&0xff;
+					int g = (pixel>>8)&0xff;
+					int b = pixel&0xff;
+					
+				    double normalized_pixel = (r + g + b)/765.0;
+				    normalized_image_array[x][y] = normalized_pixel;
+				    
 				}
 			}
-			ImageIO.write(test_image, "png", new File("src/visualizeFourierSeries/output.png"));
-			image = test_image;
+			
+			thresholdImage(normalized_image_array, 0.5);
+			output_image = thresholdImageToBufferedImage(normalized_image_array);
+			
+			
+			ImageIO.write(output_image, "png", new File("src/visualizeFourierSeries/output.png"));
 			
 			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static void thresholdImage(double[][] image_array, double threshold_value){
+		
+		for(int y = 0; y < image_array[0].length; y++){
+			for(int x = 0; x < image_array.length; x++){
+				double pixel = image_array[x][y];
+				
+				if(pixel < threshold_value){
+					image_array[x][y] = 0.0;
+				}
+				else{
+					image_array[x][y] = 1.0;
+				}
+			}
+		}
+	}
+	
+	public static BufferedImage thresholdImageToBufferedImage(double[][] image_array){
+		int width = image_array.length;
+		int height = image_array[0].length;
+		BufferedImage result = new BufferedImage(width, height, BufferedImage.TYPE_BYTE_GRAY);
+		
+		for(int y = 0; y < height; y++){
+			for(int x = 0; x < width; x++){
+				if(image_array[x][y] == 0.0){
+					result.setRGB(x, y, 0);
+				}
+				else{
+					result.setRGB(x, y, 0xFFFFFF);
+				}
+			}
+		}
+		
+		return result;
 	}
 
 }
