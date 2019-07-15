@@ -36,8 +36,8 @@ public class renderLoop implements Runnable{
 			//	Main.app_window.fourier_series_drawn_image_array.add(current_end_point);
 				
 				// Increase the function input value
-				//independent_variable += 0.001;
-				independent_variable += Main.app_window.animation_drawing_speed/Main.app_window.initial_drawn_image_array_size;
+				independent_variable += 0.001;
+				//independent_variable += Main.app_window.animation_drawing_speed/Main.app_window.initial_drawn_image_array_size;
 			}
 			
 			try {

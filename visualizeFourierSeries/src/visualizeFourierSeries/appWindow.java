@@ -24,8 +24,8 @@ import javax.swing.JPanel;
 public class appWindow extends JFrame{
 	
 	private int drawing_brush_size = 5;
-	public double animation_drawing_speed = 0.2;
-	boolean show_target_function_in_animation = true;
+	public double animation_drawing_speed = 1.0;
+	boolean show_target_function_in_animation = false;
 	JPanel rendering_panel;
 	public static int rendering_panel_width = 1400;
 	public static int rendering_panel_height = 1000; // atm the frame and rendering panel have the same size, need to add other containers
@@ -36,11 +36,12 @@ public class appWindow extends JFrame{
 	ArrayList<Point> fourier_series_drawn_image_array = new ArrayList<Point>();
 	ArrayList<arrowAndCircleRenderData> arrow_circle_render_data_array = new ArrayList<arrowAndCircleRenderData>();
 	public int initial_drawn_image_array_size;
-	private int current_app_status = 1;
 	
+	private int current_app_status = 1;
 	// Different application status values
 	public static final int DRAWING_IMAGE = 1;
 	public static final int RENDERING_FOURIER_ANIMATION = 2;
+	public static final int TRACING_INPUT_IMAGE = 3;
 	
 	boolean arrow_calculations_done = false;
 
@@ -74,6 +75,7 @@ public class appWindow extends JFrame{
 						}
 						
 						drawImageArray(g2, drawn_image_array, Color.black);
+						drawOriginMarker(g2);
 						break;
 						
 					case RENDERING_FOURIER_ANIMATION:
@@ -96,17 +98,16 @@ public class appWindow extends JFrame{
 							drawImageArray(g2, fourier_series_drawn_image_array, Color.red);
 						}
 						
+						drawOriginMarker(g2);
+						break;
+					case TRACING_INPUT_IMAGE:
+						g2.drawImage(imageInputFunctions.image, 200, 200, imageInputFunctions.image.getWidth(), imageInputFunctions.image.getHeight(), null);
+						g2.drawImage(imageInputFunctions.input_image, 600, 200, imageInputFunctions.input_image.getWidth(), imageInputFunctions.input_image.getHeight(), null);
 						break;
 					default:
 						this.setBackground(Color.BLACK);
 						break;
 				}
-				
-				Color color = new Color(0, 0, 0, (float) 0.5); 
-				g2.setColor(color);
-				g2.setStroke(new BasicStroke(1));
-				g2.drawLine(mathematics.originPixelX, mathematics.originPixelY-5, mathematics.originPixelX, mathematics.originPixelY+5);
-				g2.drawLine(mathematics.originPixelX-5, mathematics.originPixelY, mathematics.originPixelX+5, mathematics.originPixelY);
 				
 				
 			}
@@ -283,6 +284,14 @@ public class appWindow extends JFrame{
 			// Reset the stroke to default
 			g2.setStroke(new BasicStroke(1));
 		}
+	}
+	
+	public void drawOriginMarker(Graphics2D g2) {
+		Color color = new Color(0, 0, 0, (float) 0.5); 
+		g2.setColor(color);
+		g2.setStroke(new BasicStroke(1));
+		g2.drawLine(mathematics.originPixelX, mathematics.originPixelY-5, mathematics.originPixelX, mathematics.originPixelY+5);
+		g2.drawLine(mathematics.originPixelX-5, mathematics.originPixelY, mathematics.originPixelX+5, mathematics.originPixelY);
 	}
 	
 	public void render(){

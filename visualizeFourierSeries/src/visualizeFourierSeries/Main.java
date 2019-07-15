@@ -11,7 +11,7 @@ public class Main {
 	}
 	
 	public static void initialSetup(){
-		imageInputFunctions.readImage("C:/Users/Rickard/Pictures/fourierSeriesTestImage.jpg");
+		imageInputFunctions.readImage("src/visualizeFourierSeries/fourierSeriesTestImage.jpg");
 		mathematics.createShiftIndices();
 	}
 
