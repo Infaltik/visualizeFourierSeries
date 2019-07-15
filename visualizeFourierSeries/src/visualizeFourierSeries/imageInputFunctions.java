@@ -1,10 +1,14 @@
 package visualizeFourierSeries;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import javax.imageio.ImageIO;
 
@@ -13,6 +17,7 @@ public class imageInputFunctions {
 	public static BufferedImage input_image;
 	public static double[][] normalized_image_array;
 	public static BufferedImage output_image;
+	public static ArrayList<Point> traced_image_array = new ArrayList<Point>();
 	
 	public static void readImage(String filePath){
 		File file = new File(filePath);
@@ -81,6 +86,49 @@ public class imageInputFunctions {
 		}
 		
 		return result;
+	}
+	
+	public static void drawImageTracingPreview(Graphics2D g2) {
+		g2.setStroke(new BasicStroke(5));
+		g2.drawRect(Main.app_window.rendering_panel_width-output_image.getWidth()-18, 5, output_image.getWidth(), output_image.getHeight());
+		g2.drawImage(output_image, Main.app_window.rendering_panel_width-output_image.getWidth()-18, 5,
+				output_image.getWidth(), output_image.getHeight(), null);
+		g2.setColor(Color.red);
+		g2.setStroke(new BasicStroke(2));
+		double proportion = ((double) Main.app_window.getHeight())/Main.app_window.getWidth();
+		g2.drawRect(Main.app_window.rendering_panel_width-output_image.getWidth()-18, 5, output_image.getWidth(), (int) (output_image.getWidth()*proportion));
+		
+	}
+	
+	public static void printTracedArrayInSavableFormat() {
+		
+		for(int i = 0; i < traced_image_array.size(); i++) {
+			System.out.print("new Point(" + traced_image_array.get(i).x + "," + traced_image_array.get(i).y + "), ");
+			if((i+1)%10 == 0) {
+				System.out.print("\n");
+			}
+		}
+		System.out.print("\n");
+		
+		
+		ArrayList<Point> test = new ArrayList<Point>();
+		Collections.addAll(test, new Point(207,204), new Point(208,204), new Point(209,204), new Point(210,204), new Point(211,204), new Point(212,204), new Point(213,204), new Point(214,204), new Point(215,204), new Point(216,204), 
+				new Point(217,204), new Point(218,204), new Point(219,204), new Point(220,204), new Point(221,204), new Point(222,204), new Point(223,204), new Point(224,204), new Point(225,204), new Point(226,204), 
+				new Point(227,204), new Point(228,204), new Point(229,204), new Point(230,204), new Point(231,204), new Point(232,204), new Point(233,204), new Point(234,204), new Point(235,204), new Point(236,204), 
+				new Point(237,204), new Point(238,204), new Point(239,204), new Point(240,204), new Point(241,204), new Point(242,204), new Point(243,204), new Point(244,204), new Point(245,204), new Point(246,204), 
+				new Point(247,204), new Point(248,204), new Point(249,204), new Point(250,204), new Point(251,204), new Point(252,204), new Point(253,204), new Point(254,204), new Point(255,204), new Point(256,204), 
+				new Point(257,204), new Point(258,204), new Point(259,204), new Point(260,204), new Point(261,204), new Point(262,204), new Point(263,204), new Point(264,204), new Point(265,204), new Point(266,204), 
+				new Point(267,204), new Point(268,204), new Point(269,204), new Point(270,204), new Point(271,204), new Point(272,204), new Point(273,204), new Point(274,204), new Point(275,204), new Point(276,204), 
+				new Point(277,204), new Point(278,204), new Point(279,204), new Point(280,204), new Point(281,204), new Point(282,204), new Point(283,204), new Point(284,204), new Point(285,204), new Point(286,204), 
+				new Point(287,204), new Point(288,204), new Point(289,204), new Point(290,204), new Point(291,204), new Point(292,204), new Point(293,204), new Point(294,204), new Point(295,204), new Point(296,204), 
+				new Point(297,204), new Point(298,204), new Point(299,204), new Point(300,204), new Point(301,204), new Point(302,204), new Point(303,204), new Point(304,204), new Point(305,204), new Point(306,204), 
+				new Point(307,204), new Point(308,204), new Point(309,204), new Point(310,204), new Point(311,204), new Point(312,204), new Point(313,204), new Point(314,204), new Point(315,204), new Point(316,204), 
+				new Point(317,204), new Point(318,204), new Point(319,204), new Point(320,204), new Point(321,204), new Point(322,204), new Point(323,204), new Point(324,204), new Point(325,204), new Point(326,204), 
+				new Point(327,204), new Point(328,204), new Point(329,204), new Point(330,204), new Point(331,204), new Point(332,204), new Point(333,204), new Point(334,204), new Point(335,204), new Point(336,204), 
+				new Point(337,204), new Point(338,204), new Point(339,204), new Point(340,204), new Point(341,204), new Point(342,204), new Point(343,204), new Point(344,204), new Point(345,204), new Point(346,204), 
+				new Point(347,204), new Point(348,204), new Point(349,204), new Point(350,204), new Point(351,204), new Point(352,204), new Point(353,204), new Point(354,204), new Point(355,204), new Point(356,204), 
+				new Point(357,204), new Point(358,204), new Point(359,204), new Point(360,204));
+		
 	}
 
 }

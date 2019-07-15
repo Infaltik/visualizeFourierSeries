@@ -9,6 +9,8 @@ import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -41,7 +43,8 @@ public class appWindow extends JFrame{
 	// Different application status values
 	public static final int DRAWING_IMAGE = 1;
 	public static final int RENDERING_FOURIER_ANIMATION = 2;
-	public static final int TRACING_INPUT_IMAGE = 3;
+	public static final int SELECTING_TRACING_INPUT_IMAGE_START = 3;
+	public static final int TRACING_INPUT_IMAGE = 4;
 	
 	boolean arrow_calculations_done = false;
 
@@ -101,8 +104,13 @@ public class appWindow extends JFrame{
 						drawOriginMarker(g2);
 						break;
 					case TRACING_INPUT_IMAGE:
-						g2.drawImage(imageInputFunctions.thresholdImageToBufferedImage(imageInputFunctions.normalized_image_array), 200, 200, imageInputFunctions.normalized_image_array.length, imageInputFunctions.normalized_image_array[0].length, null);
-						g2.drawImage(imageInputFunctions.input_image, 600, 200, imageInputFunctions.input_image.getWidth(), imageInputFunctions.input_image.getHeight(), null);
+						imageInputFunctions.drawImageTracingPreview(g2);
+						Point current_point = imageInputFunctions.traced_image_array.get(imageInputFunctions.traced_image_array.size()-1);
+						g2.setColor(Color.blue);
+						g2.fillRect(current_point.x, current_point.y, 10, 10);
+						break;
+					case SELECTING_TRACING_INPUT_IMAGE_START:
+						imageInputFunctions.drawImageTracingPreview(g2);
 						break;
 					default:
 						this.setBackground(Color.BLACK);
@@ -147,7 +155,13 @@ public class appWindow extends JFrame{
 		
 		rendering_panel.addMouseListener(new MouseListener(){
 
-			public void mouseClicked(MouseEvent arg0) {}
+			public void mouseClicked(MouseEvent e) {
+				if(current_app_status == SELECTING_TRACING_INPUT_IMAGE_START) {
+					imageInputFunctions.traced_image_array.add(new Point(e.getX(), e.getY()));
+					current_app_status = TRACING_INPUT_IMAGE;
+					render();
+				}
+			}
 			public void mouseEntered(MouseEvent arg0) {}
 			public void mouseExited(MouseEvent arg0) {}
 			public void mousePressed(MouseEvent arg0) {}
@@ -177,6 +191,61 @@ public class appWindow extends JFrame{
 					renderThread.start();
 				}
 			}
+			
+		});
+		
+		this.addKeyListener(new KeyListener() {
+
+			public void keyTyped(KeyEvent e) {}
+
+			public void keyPressed(KeyEvent e) {
+				
+				if(current_app_status == TRACING_INPUT_IMAGE) {
+					Point previous_point = imageInputFunctions.traced_image_array.get(imageInputFunctions.traced_image_array.size()-1);
+					Point current_point = null;
+					switch(e.getKeyCode()) {
+					case 81: // Q key
+						current_point = new Point(previous_point.x-1, previous_point.y-1);
+						imageInputFunctions.traced_image_array.add(current_point);
+						break;
+					case 87: // W key
+						current_point = new Point(previous_point.x, previous_point.y-1);
+						imageInputFunctions.traced_image_array.add(current_point);
+						break;
+					case 69: // E key
+						current_point = new Point(previous_point.x+1, previous_point.y-1);
+						imageInputFunctions.traced_image_array.add(current_point);
+						break;
+					case 68: // D key
+						current_point = new Point(previous_point.x+1, previous_point.y);
+						imageInputFunctions.traced_image_array.add(current_point);
+						break;
+					case 67: // C key
+						current_point = new Point(previous_point.x+1, previous_point.y+1);
+						imageInputFunctions.traced_image_array.add(current_point);
+						break;
+					case 88: // X key
+						current_point = new Point(previous_point.x, previous_point.y+1);
+						imageInputFunctions.traced_image_array.add(current_point);
+						break;
+					case 90: // Z key
+						current_point = new Point(previous_point.x-1, previous_point.y+1);
+						imageInputFunctions.traced_image_array.add(current_point);
+						break;
+					case 65: // A key
+						current_point = new Point(previous_point.x-1, previous_point.y);
+						imageInputFunctions.traced_image_array.add(current_point);
+						break;
+					case 10:
+						imageInputFunctions.printTracedArrayInSavableFormat();
+						break;
+					}
+					render();
+					System.out.println(imageInputFunctions.traced_image_array.size());
+				}
+				
+			}
+			public void keyReleased(KeyEvent e) {}
 			
 		});
 		
