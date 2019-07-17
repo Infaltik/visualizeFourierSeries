@@ -18,6 +18,11 @@ public class imageInputFunctions {
 	public static double[][] normalized_image_array;
 	public static BufferedImage output_image;
 	public static ArrayList<Point> traced_image_array = new ArrayList<Point>();
+	public static int zoomInFactor = 1;
+	public static int zoom_x_pos = 0;
+	public static int zoom_y_pos = 0;
+	public static int preview_rectangle_width;
+	public static int preview_rectangle_height;
 	
 	public static void readImage(String filePath){
 		File file = new File(filePath);
@@ -88,15 +93,72 @@ public class imageInputFunctions {
 		return result;
 	}
 	
+	public static BufferedImage getZoomedInImage(int x_pos, int y_pos){
+		int old_width = appWindow.rendering_panel_width;
+		int old_height = appWindow.rendering_panel_height;
+		BufferedImage result = new BufferedImage(old_width, old_height, BufferedImage.TYPE_BYTE_GRAY);
+		
+		// Initialize the result image by a white background
+		for(int y = 0; y < old_height; y++){
+			for(int x = 0; x < old_width; x++){
+				result.setRGB(x, y, 0xFFFFFF);
+			}
+		}
+		
+		double new_width = old_width/((double) zoomInFactor);
+		double new_height = old_height/((double) zoomInFactor);
+		
+		// Draw a portion of the previewed image with large pixels
+		for(int y = 0; y < new_height-1; y++){
+			for(int x = 0; x < new_width-1; x++){
+				if( (x+x_pos < output_image.getWidth()) && (y+y_pos < output_image.getHeight()) ){
+					if(output_image.getRGB(x+x_pos, y+y_pos) == -16777216){
+						drawLargerPixel(result, x, y);
+					}
+				}
+			}
+		}
+		
+		return result;
+	}
+	
+	public static void drawLargerPixel(BufferedImage image, int x_pos, int y_pos){
+		for(int y = 0; y < zoomInFactor; y++){
+			for(int x = 0; x < zoomInFactor; x++){
+				image.setRGB(x_pos*zoomInFactor + x, y_pos*zoomInFactor + y, 0);
+			}
+		}
+	}
+	
+	
 	public static void drawImageTracingPreview(Graphics2D g2) {
+		// Should be moved from here ??? 
+		BufferedImage zoomed_in_image = getZoomedInImage(zoom_x_pos, zoom_y_pos);
+		g2.drawImage(zoomed_in_image, 0, 0, zoomed_in_image.getWidth(), zoomed_in_image.getHeight(), null);
+		// -----------------------
+		
+		
+		int preview_top_left_corner_x = Main.app_window.rendering_panel_width-output_image.getWidth()-18;
+		int preview_top_left_corner_y = 2;
+		
+		double image_to_panel_ratio = appWindow.rendering_panel_width / ((double) output_image.getWidth()*zoomInFactor);
+		
+		
 		g2.setStroke(new BasicStroke(5));
-		g2.drawRect(Main.app_window.rendering_panel_width-output_image.getWidth()-18, 5, output_image.getWidth(), output_image.getHeight());
-		g2.drawImage(output_image, Main.app_window.rendering_panel_width-output_image.getWidth()-18, 5,
+		g2.drawRect(preview_top_left_corner_x, preview_top_left_corner_y, output_image.getWidth(), output_image.getHeight());
+		g2.drawImage(output_image, preview_top_left_corner_x, preview_top_left_corner_y,
 				output_image.getWidth(), output_image.getHeight(), null);
-		g2.setColor(Color.red);
-		g2.setStroke(new BasicStroke(2));
-		double proportion = ((double) Main.app_window.getHeight())/Main.app_window.getWidth();
-		g2.drawRect(Main.app_window.rendering_panel_width-output_image.getWidth()-18, 5, output_image.getWidth(), (int) (output_image.getWidth()*proportion));
+		
+		// Red rectangle indicator
+		if(image_to_panel_ratio < 1){
+			g2.setColor(Color.red);
+			g2.setStroke(new BasicStroke(2));
+			double proportion = ((double) Main.app_window.getHeight())/Main.app_window.getWidth();
+			preview_rectangle_width = (int) (output_image.getWidth()*image_to_panel_ratio);
+			preview_rectangle_height = (int) (preview_rectangle_width*proportion);
+			g2.drawRect(preview_top_left_corner_x + zoom_x_pos, preview_top_left_corner_y + zoom_y_pos,
+					preview_rectangle_width, preview_rectangle_height);
+		}
 		
 	}
 	

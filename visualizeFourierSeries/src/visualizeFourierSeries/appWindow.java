@@ -107,7 +107,7 @@ public class appWindow extends JFrame{
 						imageInputFunctions.drawImageTracingPreview(g2);
 						Point current_point = imageInputFunctions.traced_image_array.get(imageInputFunctions.traced_image_array.size()-1);
 						g2.setColor(Color.blue);
-						g2.fillRect(current_point.x, current_point.y, 10, 10);
+						g2.fillRect(current_point.x, current_point.y, imageInputFunctions.zoomInFactor, imageInputFunctions.zoomInFactor);
 						break;
 					case SELECTING_TRACING_INPUT_IMAGE_START:
 						imageInputFunctions.drawImageTracingPreview(g2);
@@ -157,7 +157,12 @@ public class appWindow extends JFrame{
 
 			public void mouseClicked(MouseEvent e) {
 				if(current_app_status == SELECTING_TRACING_INPUT_IMAGE_START) {
-					imageInputFunctions.traced_image_array.add(new Point(e.getX(), e.getY()));
+					
+					// Find the actual pixel value for the zoomed in selected pixel
+					int x_residual = e.getX()%imageInputFunctions.zoomInFactor;
+					int y_residual = e.getY()%imageInputFunctions.zoomInFactor;
+					
+					imageInputFunctions.traced_image_array.add(new Point(e.getX()-x_residual, e.getY()-y_residual));
 					current_app_status = TRACING_INPUT_IMAGE;
 					render();
 				}
@@ -200,48 +205,115 @@ public class appWindow extends JFrame{
 
 			public void keyPressed(KeyEvent e) {
 				
-				if(current_app_status == TRACING_INPUT_IMAGE) {
+				switch(current_app_status){
+				case TRACING_INPUT_IMAGE:
 					Point previous_point = imageInputFunctions.traced_image_array.get(imageInputFunctions.traced_image_array.size()-1);
 					Point current_point = null;
+					int step_size = imageInputFunctions.zoomInFactor;
 					switch(e.getKeyCode()) {
 					case 81: // Q key
-						current_point = new Point(previous_point.x-1, previous_point.y-1);
+						current_point = new Point(previous_point.x-step_size, previous_point.y-step_size);
 						imageInputFunctions.traced_image_array.add(current_point);
+						render();
 						break;
 					case 87: // W key
-						current_point = new Point(previous_point.x, previous_point.y-1);
+						current_point = new Point(previous_point.x, previous_point.y-step_size);
 						imageInputFunctions.traced_image_array.add(current_point);
+						render();
 						break;
 					case 69: // E key
-						current_point = new Point(previous_point.x+1, previous_point.y-1);
+						current_point = new Point(previous_point.x+step_size, previous_point.y-step_size);
 						imageInputFunctions.traced_image_array.add(current_point);
+						render();
 						break;
 					case 68: // D key
-						current_point = new Point(previous_point.x+1, previous_point.y);
+						current_point = new Point(previous_point.x+step_size, previous_point.y);
 						imageInputFunctions.traced_image_array.add(current_point);
+						render();
 						break;
 					case 67: // C key
-						current_point = new Point(previous_point.x+1, previous_point.y+1);
+						current_point = new Point(previous_point.x+step_size, previous_point.y+step_size);
 						imageInputFunctions.traced_image_array.add(current_point);
+						render();
 						break;
 					case 88: // X key
-						current_point = new Point(previous_point.x, previous_point.y+1);
+						current_point = new Point(previous_point.x, previous_point.y+step_size);
 						imageInputFunctions.traced_image_array.add(current_point);
+						render();
 						break;
 					case 90: // Z key
-						current_point = new Point(previous_point.x-1, previous_point.y+1);
+						current_point = new Point(previous_point.x-step_size, previous_point.y+step_size);
 						imageInputFunctions.traced_image_array.add(current_point);
+						render();
 						break;
 					case 65: // A key
-						current_point = new Point(previous_point.x-1, previous_point.y);
+						current_point = new Point(previous_point.x-step_size, previous_point.y);
 						imageInputFunctions.traced_image_array.add(current_point);
+						render();
 						break;
 					case 10:
 						imageInputFunctions.printTracedArrayInSavableFormat();
 						break;
+					case 109:
+						imageInputFunctions.zoomInFactor--;
+						render();
+						break;
+					case 107:
+						imageInputFunctions.zoomInFactor++;
+						render();
+						break;
+					case 37:
+						imageInputFunctions.zoom_x_pos = Math.max(0, imageInputFunctions.zoom_x_pos-1);
+						render();
+						break;
+					case 38:
+						imageInputFunctions.zoom_y_pos = Math.max(0, imageInputFunctions.zoom_y_pos-1);
+						render();
+						break;
+					case 39:
+						int max_x_pos = imageInputFunctions.output_image.getWidth()-imageInputFunctions.preview_rectangle_width;
+						imageInputFunctions.zoom_x_pos = Math.min(max_x_pos, imageInputFunctions.zoom_x_pos+1);
+						render();
+						break;
+					case 40:
+						int max_y_pos = imageInputFunctions.output_image.getHeight()-imageInputFunctions.preview_rectangle_height;
+						imageInputFunctions.zoom_y_pos = Math.min(max_y_pos, imageInputFunctions.zoom_y_pos+1);
+						render();
+						break;
 					}
-					render();
-					System.out.println(imageInputFunctions.traced_image_array.size());
+					
+					break;
+				case SELECTING_TRACING_INPUT_IMAGE_START:
+					switch(e.getKeyCode()) {
+					case 109:
+						imageInputFunctions.zoomInFactor = Math.max(1, imageInputFunctions.zoomInFactor-1);
+						render();
+						break;
+					case 107:
+						imageInputFunctions.zoomInFactor++;
+						render();
+						break;
+					case 37:
+						imageInputFunctions.zoom_x_pos = Math.max(0, imageInputFunctions.zoom_x_pos-1);
+						render();
+						break;
+					case 38:
+						imageInputFunctions.zoom_y_pos = Math.max(0, imageInputFunctions.zoom_y_pos-1);
+						render();
+						break;
+					case 39:
+						int max_x_pos = imageInputFunctions.output_image.getWidth()-imageInputFunctions.preview_rectangle_width;
+						imageInputFunctions.zoom_x_pos = Math.min(max_x_pos, imageInputFunctions.zoom_x_pos+1);
+						render();
+						break;
+					case 40:
+						int max_y_pos = imageInputFunctions.output_image.getHeight()-imageInputFunctions.preview_rectangle_height;
+						imageInputFunctions.zoom_y_pos = Math.min(max_y_pos, imageInputFunctions.zoom_y_pos+1);
+						
+						render();
+						break;
+					}
+					break;
 				}
 				
 			}
