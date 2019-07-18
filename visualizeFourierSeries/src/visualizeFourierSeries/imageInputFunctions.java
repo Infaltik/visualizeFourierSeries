@@ -6,7 +6,10 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -636,5 +639,6 @@ public class imageInputFunctions {
 		new Point(204,445), new Point(203,445), new Point(202,445), new Point(202,444), new Point(201,444), new Point(200,444), new Point(199,444), new Point(198,444), new Point(198,443), new Point(197,443), 
 		new Point(196,443), new Point(196,442), new Point(195,442), new Point(195,441), new Point(194,441), new Point(194,440));
 	}
+	
 
 }
