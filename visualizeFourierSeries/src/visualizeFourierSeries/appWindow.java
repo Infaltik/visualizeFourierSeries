@@ -160,8 +160,8 @@ public class appWindow extends JFrame{
 					int x_residual = e.getX()%imageInputFunctions.zoomInFactor;
 					int y_residual = e.getY()%imageInputFunctions.zoomInFactor;
 					
-					imageInputFunctions.traced_image_array.add(new Point((e.getX()-x_residual)/imageInputFunctions.zoomInFactor
-							, (e.getY()-y_residual)/imageInputFunctions.zoomInFactor));
+					imageInputFunctions.traced_image_array.add(new Point((e.getX()-x_residual)/imageInputFunctions.zoomInFactor + imageInputFunctions.zoom_x_pos
+							, (e.getY()-y_residual)/imageInputFunctions.zoomInFactor + imageInputFunctions.zoom_y_pos));
 					current_app_status = TRACING_INPUT_IMAGE;
 					render();
 				}
@@ -250,33 +250,39 @@ public class appWindow extends JFrame{
 						imageInputFunctions.traced_image_array.add(current_point);
 						render();
 						break;
-					case 10:
+					case 10: // Enter
 						imageInputFunctions.printTracedArrayInSavableFormat();
 						break;
-					case 109:
+					case 109: // right "-"-key
 						imageInputFunctions.zoomOut();
 						render();
 						break;
-					case 107:
+					case 107: // right "+"-key
 						imageInputFunctions.zoomIn();
 						render();
 						break;
-					case 37:
+					case 37: // left arrow
 						imageInputFunctions.zoom_x_pos = Math.max(0, imageInputFunctions.zoom_x_pos-1);
 						render();
 						break;
-					case 38:
+					case 38: // up arrow
 						imageInputFunctions.zoom_y_pos = Math.max(0, imageInputFunctions.zoom_y_pos-1);
 						render();
 						break;
-					case 39:
+					case 39: // right arrow
 						int max_x_pos = imageInputFunctions.output_image.getWidth()-imageInputFunctions.preview_rectangle_width;
 						imageInputFunctions.zoom_x_pos = Math.min(max_x_pos, imageInputFunctions.zoom_x_pos+1);
 						render();
 						break;
-					case 40:
+					case 40: // down arrow
 						int max_y_pos = imageInputFunctions.output_image.getHeight()-imageInputFunctions.preview_rectangle_height;
 						imageInputFunctions.zoom_y_pos = Math.min(max_y_pos, imageInputFunctions.zoom_y_pos+1);
+						render();
+						break;
+					case 27: // esc
+						if(imageInputFunctions.traced_image_array.size() > 1) {
+							imageInputFunctions.traced_image_array.remove(imageInputFunctions.traced_image_array.size()-1);
+						}
 						render();
 						break;
 					}
@@ -308,7 +314,6 @@ public class appWindow extends JFrame{
 					case 40:
 						int max_y_pos = imageInputFunctions.output_image.getHeight()-imageInputFunctions.preview_rectangle_height;
 						imageInputFunctions.zoom_y_pos = Math.min(max_y_pos, imageInputFunctions.zoom_y_pos+1);
-						
 						render();
 						break;
 					}
