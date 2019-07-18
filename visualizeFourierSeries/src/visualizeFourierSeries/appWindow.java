@@ -25,7 +25,7 @@ import javax.swing.JPanel;
 
 public class appWindow extends JFrame{
 	
-	private int drawing_brush_size = 5;
+	private int drawing_brush_size = 1;
 	public double animation_drawing_speed = 1.0;
 	boolean show_target_function_in_animation = true;
 	JPanel rendering_panel;
@@ -39,7 +39,7 @@ public class appWindow extends JFrame{
 	ArrayList<arrowAndCircleRenderData> arrow_circle_render_data_array = new ArrayList<arrowAndCircleRenderData>();
 	public int initial_drawn_image_array_size;
 	
-	private int current_app_status = 3;
+	private int current_app_status = 1;
 	// Different application status values
 	public static final int DRAWING_IMAGE = 1;
 	public static final int RENDERING_FOURIER_ANIMATION = 2;
@@ -49,6 +49,8 @@ public class appWindow extends JFrame{
 	boolean arrow_calculations_done = false;
 
 	public appWindow(String window_title) {
+		imageInputFunctions.test1();
+		imageInputFunctions.test2();
 		
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setSize(rendering_panel_width, rendering_panel_height); // 900 750
@@ -176,6 +178,7 @@ public class appWindow extends JFrame{
 					System.out.println("Released mouse button");
 					current_app_status = 2;
 					
+					drawn_image_array = imageInputFunctions.test;
 					// Flip array so that the fourier series animation draws in the same
 					// direction as the drawer
 					Collections.reverse(drawn_image_array);
