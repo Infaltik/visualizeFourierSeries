@@ -7,6 +7,7 @@ import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -93,6 +94,14 @@ public class imageInputFunctions {
 		return result;
 	}
 	
+	public static void zoomIn(){
+		zoomInFactor++;
+	}
+	
+	public static void zoomOut(){
+		zoomInFactor = Math.max(1, imageInputFunctions.zoomInFactor-1);
+	}
+	
 	public static BufferedImage getZoomedInImage(int x_pos, int y_pos){
 		int old_width = appWindow.rendering_panel_width;
 		int old_height = appWindow.rendering_panel_height;
@@ -138,7 +147,7 @@ public class imageInputFunctions {
 		// -----------------------
 		
 		
-		int preview_top_left_corner_x = Main.app_window.rendering_panel_width-output_image.getWidth()-18;
+		int preview_top_left_corner_x = appWindow.rendering_panel_width-output_image.getWidth()-18;
 		int preview_top_left_corner_y = 2;
 		
 		double image_to_panel_ratio = appWindow.rendering_panel_width / ((double) output_image.getWidth()*zoomInFactor);
@@ -159,6 +168,25 @@ public class imageInputFunctions {
 			g2.drawRect(preview_top_left_corner_x + zoom_x_pos, preview_top_left_corner_y + zoom_y_pos,
 					preview_rectangle_width, preview_rectangle_height);
 		}
+		
+	}
+	
+	public static void drawTracingMarker(Graphics2D g2){
+		Point current_point = traced_image_array.get(traced_image_array.size()-1);
+		g2.setColor(Color.blue);
+		
+		// Translate the image coordinate to the coordinate in the zoomed in image
+		int x = (current_point.x - zoom_x_pos)*zoomInFactor;
+		int y = (current_point.y - zoom_y_pos)*zoomInFactor;
+		
+		g2.fillRect(x, y, zoomInFactor, zoomInFactor);
+		
+		g2.setColor(Color.red);
+		g2.drawString("Tracing marker coordinates: x=" + current_point.x + ", y=" + current_point.y, 
+				50, 50);
+		
+		g2.drawString("Distance from mouse pointer to marker x=: " + (appWindow.x-x)+
+				", y=" + (appWindow.y-y), 50, 75);
 		
 	}
 	
