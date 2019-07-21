@@ -7,7 +7,7 @@ import java.util.Collections;
 
 public class mathematics {
 	
-	public static int nbr_of_fourier_terms = 1001;
+	public static int nbr_of_fourier_terms = 21;
 	public static complexNumber[] complexFunctionToApproximate;
 	public static int originPixelX = appWindow.rendering_panel_width/2;
 	public static int originPixelY = appWindow.rendering_panel_height/2;
@@ -21,6 +21,15 @@ public class mathematics {
 	public static Point calculateEndPoint(){
 		complexNumber end_point_complex_number = new complexNumber(0,0);
 		for(int i = 0; i < nbr_of_fourier_terms; i++){
+			end_point_complex_number = complexAddition(end_point_complex_number, fourier_series_terms[i]);
+		}
+		Point end_point_pixel = complexNumberToPixel(end_point_complex_number);
+		return end_point_pixel;
+	}
+	
+	public static Point calculateEndPoint(int index){
+		complexNumber end_point_complex_number = new complexNumber(0,0);
+		for(int i = 0; i < index; i++){
 			end_point_complex_number = complexAddition(end_point_complex_number, fourier_series_terms[i]);
 		}
 		Point end_point_pixel = complexNumberToPixel(end_point_complex_number);

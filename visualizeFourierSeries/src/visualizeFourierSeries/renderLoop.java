@@ -12,7 +12,7 @@ public class renderLoop implements Runnable{
 		long last_time_rendered = System.nanoTime();
 		
 		// Run the animation for one loop of the complex function
-		while(independent_variable <= 1){
+		while(independent_variable <= 1.05){
 			long current_time = System.nanoTime();
 			long delta_render = current_time - last_time_rendered;
 			
@@ -36,8 +36,8 @@ public class renderLoop implements Runnable{
 			//	Main.app_window.fourier_series_drawn_image_array.add(current_end_point);
 				
 				// Increase the function input value
-				independent_variable += 0.001;
-				//independent_variable += Main.app_window.animation_drawing_speed/Main.app_window.initial_drawn_image_array_size;
+				//independent_variable += 0.001;
+				independent_variable += Main.app_window.animation_drawing_speed/Main.app_window.initial_drawn_image_array_size;
 			}
 			
 			try {

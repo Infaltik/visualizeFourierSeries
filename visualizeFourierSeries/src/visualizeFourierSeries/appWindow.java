@@ -25,16 +25,16 @@ import javax.swing.JPanel;
 
 public class appWindow extends JFrame{
 	
-	private int drawing_brush_size = 1;
-	public double animation_drawing_speed = 1.0;
-	boolean show_target_function_in_animation = true;
+	private int drawing_brush_size = 2;
+	public double animation_drawing_speed = 2.0;
+	boolean show_target_function_in_animation = false;
 	JPanel rendering_panel;
 	public static int rendering_panel_width = 1400;
 	public static int rendering_panel_height = 1000; // atm the frame and rendering panel have the same size, need to add other containers
 									   // to have other size
 	public static int x = 0, y = 0;
 	private int prev_x = 0, prev_y = 0;
-	ArrayList<Point> drawn_image_array = new ArrayList<Point>();
+	public static ArrayList<Point> drawn_image_array = new ArrayList<Point>();
 	ArrayList<Point> fourier_series_drawn_image_array = new ArrayList<Point>();
 	ArrayList<arrowAndCircleRenderData> arrow_circle_render_data_array = new ArrayList<arrowAndCircleRenderData>();
 	public int initial_drawn_image_array_size;
@@ -49,8 +49,6 @@ public class appWindow extends JFrame{
 	boolean arrow_calculations_done = false;
 
 	public appWindow(String window_title) {
-		imageInputFunctions.test1();
-		imageInputFunctions.test2();
 		
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setSize(rendering_panel_width, rendering_panel_height); // 900 750
@@ -92,12 +90,13 @@ public class appWindow extends JFrame{
 							drawImageArray(g2, drawn_image_array, color1);
 						}
 						
-						
-						g2.setColor(Color.white);
-						for(int i = 0; i < arrow_circle_render_data_array.size(); i++){
-							drawArrow(g2, arrow_circle_render_data_array.get(i), true);
+						if(!arrow_circle_render_data_array.contains(null)){
+							g2.setColor(Color.white);
+							for(int i = 0; i < arrow_circle_render_data_array.size(); i++){
+								drawArrow(g2, arrow_circle_render_data_array.get(i), true);
+							}
+							arrow_calculations_done = false;
 						}
-						arrow_calculations_done = false;
 												
 						if(fourier_series_drawn_image_array.size() > 1){
 							drawImageArray(g2, fourier_series_drawn_image_array, Color.red);
@@ -178,7 +177,7 @@ public class appWindow extends JFrame{
 					System.out.println("Released mouse button");
 					current_app_status = 2;
 					
-					drawn_image_array = imageInputFunctions.test;
+					imageInputFunctions.loadElephantImage();
 					// Flip array so that the fourier series animation draws in the same
 					// direction as the drawer
 					Collections.reverse(drawn_image_array);
@@ -348,20 +347,31 @@ public class appWindow extends JFrame{
 	}
 	
 	public arrowAndCircleRenderData calculateArrow(complexNumber complex_value, int shift_index){
+		// Calculate the magnitude of the arrow in unit of pixels
+		double complex_magnitude = complex_value.getMagnitude();
+		double pixel_magnitude = mathematics.complexMagnitudeToPixelMagnitude(complex_magnitude);
+						
+		// If the arrow is shorter than a pixel, don't draw it
+		if(pixel_magnitude < 1){
+			return null;
+		}
+		
 		// The offset the arrow should be translated
 		int x_translation = mathematics.originPixelX;
 		int y_translation = mathematics.originPixelY;
 		if(shift_index != 0){
 			int vector_sum_index = mathematics.shiftIndexToVectorSumIndex(shift_index);
 			Point previous_end_point = arrow_circle_render_data_array.get(vector_sum_index-1).getArrowEndPoint();
+			
+			Point exact_point = mathematics.calculateEndPoint(mathematics.shiftIndexToVectorSumIndex(shift_index));
+			if(Math.abs(previous_end_point.x - exact_point.x) > 1 || Math.abs(previous_end_point.y - exact_point.y) > 1 ){
+				System.out.println(Math.abs(previous_end_point.x - exact_point.x));
+			}
+			
 			x_translation = previous_end_point.x;
 			y_translation = previous_end_point.y;
 		}
 		
-		// Calculate the magnitude of the arrow in unit of pixels
-		double complex_magnitude = complex_value.getMagnitude();
-		double pixel_magnitude = mathematics.complexMagnitudeToPixelMagnitude(complex_magnitude);
-				
 		// Calculate the angle of the arrow
 		double angle_in_radians = complex_value.getArgument();
 				
@@ -369,7 +379,7 @@ public class appWindow extends JFrame{
 		double head_arrow_x_length = pixel_magnitude/3;
 		double head_arrow_half_y_length = 0.8*head_arrow_x_length; // Could calculate these once and save them as to not calculate them over and over???
 		double body_arrow_x_length = (2*pixel_magnitude)/3;
-		double body_arrow_half_y_length = 0.2*head_arrow_half_y_length;
+		double body_arrow_half_y_length = 0.15*head_arrow_half_y_length;
 		
 		// Arrowhead calculations
 		Point2D.Double point1 = mathematics.pointDouble2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point2D.Double( body_arrow_x_length, -head_arrow_half_y_length ));
@@ -404,6 +414,12 @@ public class appWindow extends JFrame{
 	}
 	
 	public void drawArrow(Graphics2D g2, arrowAndCircleRenderData renderData, boolean showRotationCircle) {
+		
+		// If the arrow data is not available (because the arrow has length shorter than a pixel) then skip drawing
+		// that arrow
+		if(renderData == null){
+			return;
+		}
 		
 		int circleRadius = renderData.getCircleRadius();
 		int x_pos = renderData.getX();

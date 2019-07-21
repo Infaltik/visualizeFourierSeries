@@ -11,7 +11,8 @@ public class Main {
 	}
 	
 	public static void initialSetup(){
-		imageInputFunctions.readImage("C:\\Users\\Rickard\\Pictures\\output_manually_modified.png");
+		imageInputFunctions.loadElephantImage();
+		imageInputFunctions.readImage("src\\visualizeFourierSeries\\output_manually_modified.png");
 		mathematics.createShiftIndices();
 	}
 
