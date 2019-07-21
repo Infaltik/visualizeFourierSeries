@@ -8,6 +8,8 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -19,6 +21,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -27,7 +30,7 @@ public class appWindow extends JFrame{
 	
 	private int drawing_brush_size = 2;
 	public double animation_drawing_speed = 2.0;
-	boolean show_target_function_in_animation = true;
+	boolean show_target_function_in_animation = false;
 	JPanel rendering_panel;
 	public static int rendering_panel_width = 1400;
 	public static int rendering_panel_height = 1000; // atm the frame and rendering panel have the same size, need to add other containers
@@ -37,14 +40,16 @@ public class appWindow extends JFrame{
 	public static ArrayList<Point> drawn_image_array = new ArrayList<Point>();
 	ArrayList<Point> fourier_series_drawn_image_array = new ArrayList<Point>();
 	ArrayList<arrowAndCircleRenderData> arrow_circle_render_data_array = new ArrayList<arrowAndCircleRenderData>();
-	public int initial_drawn_image_array_size;
+	public static int initial_drawn_image_array_size;
 	
-	private int current_app_status = 1;
 	// Different application status values
-	public static final int DRAWING_IMAGE = 1;
-	public static final int RENDERING_FOURIER_ANIMATION = 2;
-	public static final int SELECTING_TRACING_INPUT_IMAGE_START = 3;
-	public static final int TRACING_INPUT_IMAGE = 4;
+	public static final int SELECTION_SCREEN = 1;
+	public static final int DRAWING_IMAGE = 2;
+	public static final int RENDERING_FOURIER_ANIMATION = 3;
+	public static final int SELECTING_TRACING_INPUT_IMAGE_START = 4;
+	public static final int TRACING_INPUT_IMAGE = 5;
+	
+	private int current_app_status = DRAWING_IMAGE;
 	
 	boolean arrow_calculations_done = false;
 
@@ -176,22 +181,16 @@ public class appWindow extends JFrame{
 				
 				if(current_app_status == DRAWING_IMAGE){
 					System.out.println("Released mouse button");
-					current_app_status = 2;
+					current_app_status = RENDERING_FOURIER_ANIMATION;
 					
 					imageInputFunctions.loadElephantImage();
+					
 					// Flip array so that the fourier series animation draws in the same
 					// direction as the drawer
 					Collections.reverse(drawn_image_array);
 					
-					
 					mathematics.convertToComplexAndStoreFunction(drawn_image_array);
-					System.out.println(mathematics.complexFunctionToApproximate.length);
-					initial_drawn_image_array_size = drawn_image_array.size();
-					for(int i = 1; i <= 5; i++) {
-						mathematics.addMoreSamplesToFunction();
-						System.out.println("done" + i);
-					}
-					System.out.println(mathematics.complexFunctionToApproximate.length);
+					mathematics.iterateAddingMoreSamplesToFunction(5);
 					mathematics.calculateFourierSeriesCoefficients();
 					
 					Thread renderThread = new Thread(new renderLoop());
@@ -289,7 +288,6 @@ public class appWindow extends JFrame{
 						render();
 						break;
 					}
-					
 					break;
 				case SELECTING_TRACING_INPUT_IMAGE_START:
 					switch(e.getKeyCode()) {
@@ -328,6 +326,17 @@ public class appWindow extends JFrame{
 			
 		});
 		
+		JButton test_button = new JButton("Test");
+		test_button.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("Button pressed");
+			}
+			
+		});
+		
+		rendering_panel.add(test_button);
+		
 		rendering_panel.setBackground(Color.WHITE);
 		this.add(rendering_panel);
 		
@@ -345,39 +354,26 @@ public class appWindow extends JFrame{
 		arrow_calculations_done = true;
 	}
 	
-	public arrowAndCircleRenderData calculateArrow2(complexNumber complex_value, int shift_index){
+	public arrowAndCircleRenderData calculateArrow(complexNumber complex_value, int shift_index){
+		
+		
 		int vector_sum_index = mathematics.shiftIndexToVectorSumIndex(shift_index);
 		Point2D.Double end_point = mathematics.calculateEndPointDouble(vector_sum_index);
-		
-		// The offset the arrow should be translated
-		int x_translation = mathematics.originPixelX;
-		int y_translation = mathematics.originPixelY;
-		
-		Point previous_end_point = new Point(x_translation, y_translation);
-		if(vector_sum_index != 0){
-			
-			// If the previous arrow was so small that it wasn't drawn, use the mathematical
-			// end point
-			if(arrow_circle_render_data_array.get(vector_sum_index-1) == null){
-				previous_end_point = mathematics.calculateEndPoint(vector_sum_index-1);
-			}
-			else{
-				previous_end_point = arrow_circle_render_data_array.get(vector_sum_index-1).getArrowEndPoint();
-			}
-			
-			x_translation = previous_end_point.x;
-			y_translation = previous_end_point.y;
-		}
+		Point2D.Double previous_end_point = mathematics.calculateEndPointDouble(vector_sum_index-1);
 		
 		// Calculate the magnitude of the arrow in unit of pixels
 		double pixel_magnitude = Math.sqrt( (end_point.x - previous_end_point.x)*
 				(end_point.x - previous_end_point.x) + (end_point.y - previous_end_point.y)*
-				(end_point.y - previous_end_point.y) );						
+				(end_point.y - previous_end_point.y) );	
 		
-		// If the arrow is shorter than a pixel, don't draw it
+		// If the arrow is shorter than a pixel, don't draw it. Return empty data
 		if(pixel_magnitude < 1){
 			return null;
 		}
+		
+		// The offset the arrow should be translated
+		double x_translation = previous_end_point.x;
+		double y_translation = previous_end_point.y;
 		
 		// Calculate the angle of the arrow
 		double angle_in_radians = complex_value.getArgument();
@@ -415,12 +411,13 @@ public class appWindow extends JFrame{
 		int circle_radius = (int) pixel_magnitude;
 				
 		Point arrow_end_point = new Point( (int) Math.round(point2.x), (int) Math.round(point2.y));
-		arrowAndCircleRenderData data = new arrowAndCircleRenderData(x_translation, y_translation, arrow_end_point, arrow_polygon, circle_radius);
-				
+		arrowAndCircleRenderData data = new arrowAndCircleRenderData((int) Math.round(x_translation), 
+				(int) Math.round(y_translation), arrow_end_point, arrow_polygon, circle_radius);
+		
 		return data;
 	}
 	
-	public arrowAndCircleRenderData calculateArrow(complexNumber complex_value, int shift_index){
+	public arrowAndCircleRenderData calculateArrow2(complexNumber complex_value, int shift_index){
 		// TEMPORARY TEST
 		Point exact_point = mathematics.calculateEndPoint(
 				mathematics.shiftIndexToVectorSumIndex(shift_index));

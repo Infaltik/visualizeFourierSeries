@@ -220,7 +220,7 @@ public class imageInputFunctions {
 			while( (current_string = br.readLine()) != null ){
 				if(current_string.contains(",")){
 					String[] string_parts = current_string.split("\\,");
-					result_array.add(new Point(Integer.parseInt(string_parts[0]), Integer.parseInt(string_parts[1])));
+					result_array.add(new Point(2*Integer.parseInt(string_parts[0]), 2*Integer.parseInt(string_parts[1])));
 				}
 				else{
 					throw new IllegalArgumentException("String " + current_string + " does not contain ,");

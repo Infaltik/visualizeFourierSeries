@@ -29,7 +29,7 @@ public class mathematics {
 	
 	public static Point calculateEndPoint(int index){
 		complexNumber end_point_complex_number = new complexNumber(0,0);
-		for(int i = 0; i < index+1; i++){
+		for(int i = 0; i <= index; i++){
 			end_point_complex_number = complexAddition(end_point_complex_number, fourier_series_terms[i]);
 		}
 		Point end_point_pixel = complexNumberToPixel(end_point_complex_number);
@@ -38,7 +38,7 @@ public class mathematics {
 	
 	public static Point2D.Double calculateEndPointDouble(int index){
 		complexNumber end_point_complex_number = new complexNumber(0,0);
-		for(int i = 0; i < index+1; i++){
+		for(int i = 0; i <= index; i++){
 			end_point_complex_number = complexAddition(end_point_complex_number, fourier_series_terms[i]);
 		}
 		Point2D.Double end_point_pixel = complexNumberToPixelDouble(end_point_complex_number);
@@ -78,6 +78,13 @@ public class mathematics {
 		res = new complexNumber(res.getRealPart()*delta_t, res.getImagPart()*delta_t);
 		
 		return res;
+	}
+	
+	public static void iterateAddingMoreSamplesToFunction(int number_of_iterations) {
+		appWindow.initial_drawn_image_array_size = appWindow.drawn_image_array.size();
+		for(int i = 1; i <= number_of_iterations; i++) {
+			mathematics.addMoreSamplesToFunction();
+		}
 	}
 	
 	public static void addMoreSamplesToFunction() {
