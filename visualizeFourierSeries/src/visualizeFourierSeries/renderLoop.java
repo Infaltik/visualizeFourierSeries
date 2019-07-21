@@ -31,10 +31,6 @@ public class renderLoop implements Runnable{
 				Main.app_window.arrowPreRenderCalculations();
 				
 				
-				int array_size = Main.app_window.arrow_circle_render_data_array.size();
-				Point current_end_point = Main.app_window.arrow_circle_render_data_array.get(array_size-1).getArrowEndPoint();
-			//	Main.app_window.fourier_series_drawn_image_array.add(current_end_point);
-				
 				// Increase the function input value
 				//independent_variable += 0.001;
 				independent_variable += Main.app_window.animation_drawing_speed/Main.app_window.initial_drawn_image_array_size;

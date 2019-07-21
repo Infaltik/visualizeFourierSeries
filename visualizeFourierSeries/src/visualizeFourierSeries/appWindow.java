@@ -27,7 +27,7 @@ public class appWindow extends JFrame{
 	
 	private int drawing_brush_size = 2;
 	public double animation_drawing_speed = 2.0;
-	boolean show_target_function_in_animation = false;
+	boolean show_target_function_in_animation = true;
 	JPanel rendering_panel;
 	public static int rendering_panel_width = 1400;
 	public static int rendering_panel_height = 1000; // atm the frame and rendering panel have the same size, need to add other containers
@@ -90,13 +90,14 @@ public class appWindow extends JFrame{
 							drawImageArray(g2, drawn_image_array, color1);
 						}
 						
-						if(!arrow_circle_render_data_array.contains(null)){
+						if(true){
 							g2.setColor(Color.white);
 							for(int i = 0; i < arrow_circle_render_data_array.size(); i++){
 								drawArrow(g2, arrow_circle_render_data_array.get(i), true);
 							}
 							arrow_calculations_done = false;
 						}
+						
 												
 						if(fourier_series_drawn_image_array.size() > 1){
 							drawImageArray(g2, fourier_series_drawn_image_array, Color.red);
@@ -335,9 +336,7 @@ public class appWindow extends JFrame{
 	}
 	
 	public void arrowPreRenderCalculations(){
-
 		arrow_circle_render_data_array.clear();
-		ArrayList<arrowAndCircleRenderData> current_arrows_array = new ArrayList<arrowAndCircleRenderData>();
 		for(int i = 0; i < mathematics.nbr_of_fourier_terms; i++){
 			arrowAndCircleRenderData current_arrow = calculateArrow(mathematics.fourier_series_terms[i], mathematics.shifting_indices_array[i]);
 			arrow_circle_render_data_array.add(current_arrow);
@@ -346,14 +345,94 @@ public class appWindow extends JFrame{
 		arrow_calculations_done = true;
 	}
 	
+	public arrowAndCircleRenderData calculateArrow2(complexNumber complex_value, int shift_index){
+		int vector_sum_index = mathematics.shiftIndexToVectorSumIndex(shift_index);
+		Point2D.Double end_point = mathematics.calculateEndPointDouble(vector_sum_index);
+		
+		// The offset the arrow should be translated
+		int x_translation = mathematics.originPixelX;
+		int y_translation = mathematics.originPixelY;
+		
+		Point previous_end_point = new Point(x_translation, y_translation);
+		if(vector_sum_index != 0){
+			
+			// If the previous arrow was so small that it wasn't drawn, use the mathematical
+			// end point
+			if(arrow_circle_render_data_array.get(vector_sum_index-1) == null){
+				previous_end_point = mathematics.calculateEndPoint(vector_sum_index-1);
+			}
+			else{
+				previous_end_point = arrow_circle_render_data_array.get(vector_sum_index-1).getArrowEndPoint();
+			}
+			
+			x_translation = previous_end_point.x;
+			y_translation = previous_end_point.y;
+		}
+		
+		// Calculate the magnitude of the arrow in unit of pixels
+		double pixel_magnitude = Math.sqrt( (end_point.x - previous_end_point.x)*
+				(end_point.x - previous_end_point.x) + (end_point.y - previous_end_point.y)*
+				(end_point.y - previous_end_point.y) );						
+		
+		// If the arrow is shorter than a pixel, don't draw it
+		if(pixel_magnitude < 1){
+			return null;
+		}
+		
+		// Calculate the angle of the arrow
+		double angle_in_radians = complex_value.getArgument();
+						
+		// Arrow proportions
+		double head_arrow_x_length = pixel_magnitude/3;
+		double head_arrow_half_y_length = 0.8*head_arrow_x_length; // Could calculate these once and save them as to not calculate them over and over???
+		double body_arrow_x_length = (2*pixel_magnitude)/3;
+		double body_arrow_half_y_length = 0.15*head_arrow_half_y_length;
+		
+		// Arrowhead calculations
+		Point2D.Double point1 = mathematics.pointDouble2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point2D.Double( body_arrow_x_length, -head_arrow_half_y_length ));
+		Point2D.Double point2 = mathematics.pointDouble2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point2D.Double( (body_arrow_x_length+head_arrow_x_length), 0 ));
+		Point2D.Double point3 = mathematics.pointDouble2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point2D.Double( body_arrow_x_length, head_arrow_half_y_length ));
+		Point2D.Double point4 = mathematics.pointDouble2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point2D.Double( body_arrow_x_length, body_arrow_half_y_length ));
+		Point2D.Double point5 = mathematics.pointDouble2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point2D.Double( 0, body_arrow_half_y_length ));
+		Point2D.Double point6 = mathematics.pointDouble2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point2D.Double( 0, -body_arrow_half_y_length ));
+		Point2D.Double point7 = mathematics.pointDouble2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point2D.Double( body_arrow_x_length, -body_arrow_half_y_length ));
+				
+		point1 = new Point2D.Double(point1.x+x_translation, -point1.y+y_translation);
+		point2 = new Point2D.Double(point2.x+x_translation, -point2.y+y_translation);
+		point3 = new Point2D.Double(point3.x+x_translation, -point3.y+y_translation);
+		point4 = new Point2D.Double(point4.x+x_translation, -point4.y+y_translation);
+		point5 = new Point2D.Double(point5.x+x_translation, -point5.y+y_translation);
+		point6 = new Point2D.Double(point6.x+x_translation, -point6.y+y_translation);
+		point7 = new Point2D.Double(point7.x+x_translation, -point7.y+y_translation);
+								
+		int[] xPoints = {(int) Math.round(point1.x), (int) Math.round(point2.x), (int) Math.round(point3.x), 
+							(int) Math.round(point4.x), (int) Math.round(point5.x), (int) Math.round(point6.x), (int) Math.round(point7.x)};
+		int[] yPoints = {(int) Math.round(point1.y), (int) Math.round(point2.y), (int) Math.round(point3.y), 
+							(int) Math.round(point4.y), (int) Math.round(point5.y), (int) Math.round(point6.y), (int) Math.round(point7.y)};
+		Polygon arrow_polygon = new Polygon(xPoints, yPoints, 7);
+						
+		// Circle radius calculations
+		int circle_radius = (int) pixel_magnitude;
+				
+		Point arrow_end_point = new Point( (int) Math.round(point2.x), (int) Math.round(point2.y));
+		arrowAndCircleRenderData data = new arrowAndCircleRenderData(x_translation, y_translation, arrow_end_point, arrow_polygon, circle_radius);
+				
+		return data;
+	}
+	
 	public arrowAndCircleRenderData calculateArrow(complexNumber complex_value, int shift_index){
+		// TEMPORARY TEST
+		Point exact_point = mathematics.calculateEndPoint(
+				mathematics.shiftIndexToVectorSumIndex(shift_index));
+		
+		
 		// Calculate the magnitude of the arrow in unit of pixels
 		double complex_magnitude = complex_value.getMagnitude();
 		double pixel_magnitude = mathematics.complexMagnitudeToPixelMagnitude(complex_magnitude);
 						
 		// If the arrow is shorter than a pixel, don't draw it
 		if(pixel_magnitude < 1){
-			return null;
+			//return null;
 		}
 		
 		// The offset the arrow should be translated
@@ -363,9 +442,9 @@ public class appWindow extends JFrame{
 			int vector_sum_index = mathematics.shiftIndexToVectorSumIndex(shift_index);
 			Point previous_end_point = arrow_circle_render_data_array.get(vector_sum_index-1).getArrowEndPoint();
 			
-			Point exact_point = mathematics.calculateEndPoint(mathematics.shiftIndexToVectorSumIndex(shift_index));
 			if(Math.abs(previous_end_point.x - exact_point.x) > 1 || Math.abs(previous_end_point.y - exact_point.y) > 1 ){
-				System.out.println(Math.abs(previous_end_point.x - exact_point.x));
+				//System.out.println(Math.abs(previous_end_point.x - exact_point.x) + ", " + 
+				//		Math.abs(previous_end_point.y - exact_point.y));
 			}
 			
 			x_translation = previous_end_point.x;
@@ -406,6 +485,12 @@ public class appWindow extends JFrame{
 				
 		// Circle radius calculations
 		int circle_radius = (int) pixel_magnitude;
+		
+		// TEMPORARY TEST
+		if(mathematics.shiftIndexToVectorSumIndex(shift_index) == 20){
+			System.out.println(Math.abs(point2.x - exact_point.x) + ", " + 
+					Math.abs(point2.y - exact_point.y) + ", " + mathematics.shiftIndexToVectorSumIndex(shift_index));
+		}
 		
 		Point arrow_end_point = new Point( (int) Math.round(point2.x), (int) Math.round(point2.y));
 		arrowAndCircleRenderData data = new arrowAndCircleRenderData(x_translation, y_translation, arrow_end_point, arrow_polygon, circle_radius);

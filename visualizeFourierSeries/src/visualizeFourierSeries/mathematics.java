@@ -7,7 +7,7 @@ import java.util.Collections;
 
 public class mathematics {
 	
-	public static int nbr_of_fourier_terms = 21;
+	public static int nbr_of_fourier_terms = 501;
 	public static complexNumber[] complexFunctionToApproximate;
 	public static int originPixelX = appWindow.rendering_panel_width/2;
 	public static int originPixelY = appWindow.rendering_panel_height/2;
@@ -29,10 +29,19 @@ public class mathematics {
 	
 	public static Point calculateEndPoint(int index){
 		complexNumber end_point_complex_number = new complexNumber(0,0);
-		for(int i = 0; i < index; i++){
+		for(int i = 0; i < index+1; i++){
 			end_point_complex_number = complexAddition(end_point_complex_number, fourier_series_terms[i]);
 		}
 		Point end_point_pixel = complexNumberToPixel(end_point_complex_number);
+		return end_point_pixel;
+	}
+	
+	public static Point2D.Double calculateEndPointDouble(int index){
+		complexNumber end_point_complex_number = new complexNumber(0,0);
+		for(int i = 0; i < index+1; i++){
+			end_point_complex_number = complexAddition(end_point_complex_number, fourier_series_terms[i]);
+		}
+		Point2D.Double end_point_pixel = complexNumberToPixelDouble(end_point_complex_number);
 		return end_point_pixel;
 	}
 	
@@ -182,6 +191,14 @@ public class mathematics {
 		int y_pixel = (int) Math.round(-complex_number.getImagPart()*pixelNormalizingFactor + originPixelY);
 		
 		return new Point(x_pixel, y_pixel);
+	}
+	
+	public static Point2D.Double complexNumberToPixelDouble(complexNumber complex_number){
+		
+		double x_pixel = complex_number.getRealPart()*pixelNormalizingFactor + originPixelX;
+		double y_pixel = -complex_number.getImagPart()*pixelNormalizingFactor + originPixelY;
+		
+		return new Point2D.Double(x_pixel, y_pixel);
 	}
 	
 	public static double complexMagnitudeToPixelMagnitude(double complex_magnitude){
