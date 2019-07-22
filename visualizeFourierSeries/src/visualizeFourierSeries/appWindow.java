@@ -2,7 +2,6 @@ package visualizeFourierSeries;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -10,18 +9,19 @@ import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
+import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -188,18 +188,7 @@ public class appWindow extends JFrame{
 					System.out.println("Released mouse button");
 					current_app_status = RENDERING_FOURIER_ANIMATION;
 					
-					imageInputFunctions.loadElephantImage();
-					
-					// Flip array so that the fourier series animation draws in the same
-					// direction as the drawer
-					Collections.reverse(drawn_image_array);
-					
-					mathematics.convertToComplexAndStoreFunction(drawn_image_array);
-					mathematics.iterateAddingMoreSamplesToFunction(5);
-					mathematics.calculateFourierSeriesCoefficients();
-					
-					Thread renderThread = new Thread(new renderLoop());
-					renderThread.start();
+					calculateAndstartFourierAnimation();
 				}
 			}
 			
@@ -347,20 +336,37 @@ public class appWindow extends JFrame{
 		trace_input_image_button.setFocusable(false);
 		trace_input_image_button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				JFileChooser fc = new JFileChooser();
+				int returned_value = fc.showOpenDialog(null);
+				
+				if(returned_value == JFileChooser.APPROVE_OPTION) {
+					File file = fc.getSelectedFile();
+					imageInputFunctions.readImage(file);
+					
+					showSelectionButtons(false);
+					current_app_status = SELECTING_TRACING_INPUT_IMAGE_START;
+					render();
+				}
+				else if(returned_value == JFileChooser.CANCEL_OPTION) {
+					System.out.println("File selection canceled");
+				}
+				else if(returned_value == JFileChooser.ERROR_OPTION) {
+					System.err.println("An error occured while selecting a file");
+				}
+				
 				System.out.println("Trace input image button pressed");
-				showSelectionButtons(false);
-				current_app_status = SELECTING_TRACING_INPUT_IMAGE_START;
-				render();
 			}
 		});
 		
-		elephant_image_demo_button = new JButton("Elephant image demo");
+		elephant_image_demo_button = new JButton("Show demo");
 		elephant_image_demo_button.setFocusable(false);
 		elephant_image_demo_button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Elephant image demo button pressed");
 				showSelectionButtons(false);
-				current_app_status = 0;
+				current_app_status = RENDERING_FOURIER_ANIMATION;
+				imageInputFunctions.loadElephantImage();
+				calculateAndstartFourierAnimation();
 				render();
 			}
 		});
@@ -582,6 +588,19 @@ public class appWindow extends JFrame{
 		g2.setStroke(new BasicStroke(1));
 		g2.drawLine(mathematics.originPixelX, mathematics.originPixelY-5, mathematics.originPixelX, mathematics.originPixelY+5);
 		g2.drawLine(mathematics.originPixelX-5, mathematics.originPixelY, mathematics.originPixelX+5, mathematics.originPixelY);
+	}
+	
+	public void calculateAndstartFourierAnimation() {
+		// Flip array so that the fourier series animation draws in the same
+		// direction as the drawer
+		Collections.reverse(drawn_image_array);
+		
+		mathematics.convertToComplexAndStoreFunction(drawn_image_array);
+		mathematics.iterateAddingMoreSamplesToFunction(5); // Make this input dependant on number of fourier terms ???
+		mathematics.calculateFourierSeriesCoefficients();
+		
+		Thread renderThread = new Thread(new renderLoop());
+		renderThread.start();
 	}
 	
 	public void render(){

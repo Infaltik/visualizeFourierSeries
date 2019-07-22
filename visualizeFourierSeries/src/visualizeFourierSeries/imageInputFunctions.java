@@ -29,8 +29,7 @@ public class imageInputFunctions {
 	
 	public static ArrayList<Point> test = new ArrayList<Point>();
 	
-	public static void readImage(String filePath){
-		File file = new File(filePath);
+	public static void readImage(File file){
 		input_image = null;
 		
 		try {
