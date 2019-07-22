@@ -42,6 +42,10 @@ public class appWindow extends JFrame{
 	ArrayList<arrowAndCircleRenderData> arrow_circle_render_data_array = new ArrayList<arrowAndCircleRenderData>();
 	public static int initial_drawn_image_array_size;
 	
+	JButton draw_image_button;
+	JButton trace_input_image_button;
+	JButton elephant_image_demo_button;
+	
 	// Different application status values
 	public static final int SELECTION_SCREEN = 1;
 	public static final int DRAWING_IMAGE = 2;
@@ -49,7 +53,7 @@ public class appWindow extends JFrame{
 	public static final int SELECTING_TRACING_INPUT_IMAGE_START = 4;
 	public static final int TRACING_INPUT_IMAGE = 5;
 	
-	private int current_app_status = DRAWING_IMAGE;
+	private int current_app_status = SELECTION_SCREEN;
 	
 	boolean arrow_calculations_done = false;
 
@@ -70,6 +74,7 @@ public class appWindow extends JFrame{
 				
 				switch(current_app_status){
 					case DRAWING_IMAGE:
+						this.setBackground(Color.white);
 						
 						g2.drawString("Mouse position: " + x + ", " + y, 40, 40);
 						
@@ -205,6 +210,7 @@ public class appWindow extends JFrame{
 			public void keyTyped(KeyEvent e) {}
 
 			public void keyPressed(KeyEvent e) {
+				System.out.println("Key pressed");
 				
 				switch(current_app_status){
 				case TRACING_INPUT_IMAGE:
@@ -326,20 +332,45 @@ public class appWindow extends JFrame{
 			
 		});
 		
-		JButton test_button = new JButton("Test");
-		test_button.addActionListener(new ActionListener() {
-
+		draw_image_button = new JButton("Draw image");
+		draw_image_button.setFocusable(false);
+		draw_image_button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Button pressed");
+				System.out.println("Draw image button pressed");
+				showSelectionButtons(false);
+				current_app_status = DRAWING_IMAGE;
+				render();
 			}
-			
 		});
 		
-		rendering_panel.add(test_button);
+		trace_input_image_button = new JButton("Trace input image");
+		trace_input_image_button.setFocusable(false);
+		trace_input_image_button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("Trace input image button pressed");
+				showSelectionButtons(false);
+				current_app_status = SELECTING_TRACING_INPUT_IMAGE_START;
+				render();
+			}
+		});
 		
-		rendering_panel.setBackground(Color.WHITE);
+		elephant_image_demo_button = new JButton("Elephant image demo");
+		elephant_image_demo_button.setFocusable(false);
+		elephant_image_demo_button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("Elephant image demo button pressed");
+				showSelectionButtons(false);
+				current_app_status = 0;
+				render();
+			}
+		});
+		
+		
+		if(current_app_status == SELECTION_SCREEN){
+			showSelectionButtons(true);
+		}
+		
 		this.add(rendering_panel);
-		
 		
 		this.setVisible(true);
 	}
@@ -529,6 +560,19 @@ public class appWindow extends JFrame{
 			g2.drawLine(current_x, current_y, next_x, next_y);
 			// Reset the stroke to default
 			g2.setStroke(new BasicStroke(1));
+		}
+	}
+	
+	public void showSelectionButtons(boolean show_buttons){
+		if(show_buttons){
+			rendering_panel.add(draw_image_button);
+			rendering_panel.add(trace_input_image_button);
+			rendering_panel.add(elephant_image_demo_button);
+		}
+		else{
+			rendering_panel.remove(draw_image_button);
+			rendering_panel.remove(trace_input_image_button);
+			rendering_panel.remove(elephant_image_demo_button);
 		}
 	}
 	
