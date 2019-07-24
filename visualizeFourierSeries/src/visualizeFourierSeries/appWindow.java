@@ -28,6 +28,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
@@ -40,6 +41,7 @@ public class appWindow extends JFrame{
 	public double animation_drawing_speed = 2.0;
 	boolean show_target_function_in_animation = false;
 	boolean show_arrow_circles_in_animation = true;
+	boolean show_arrows_in_animation = true;
 	JPanel rendering_panel;
 	public static int rendering_panel_width = 1400;
 	public static int rendering_panel_height = 1000; // atm the frame and rendering panel have the same size, need to add other containers
@@ -85,6 +87,10 @@ public class appWindow extends JFrame{
 				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 				
 				switch(current_app_status){
+					case SELECTION_SCREEN:
+						this.setBackground(Color.black);
+						break;
+					
 					case DRAWING_IMAGE:
 						this.setBackground(Color.white);
 						
@@ -377,9 +383,10 @@ public class appWindow extends JFrame{
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Elephant image demo button pressed");
 				showSelectionButtons(false);
-				current_app_status = RENDERING_FOURIER_ANIMATION;
 				imageInputFunctions.loadElephantImage();
 				calculateAndstartFourierAnimation();
+				
+				current_app_status = RENDERING_FOURIER_ANIMATION;
 				render();
 			}
 		});
@@ -392,11 +399,11 @@ public class appWindow extends JFrame{
 		this.add(rendering_panel, BorderLayout.WEST);
 		
 		JPanel settings_panel = new JPanel();
-		settings_panel.setBackground(Color.green);
+		settings_panel.setBackground(Color.white);
 		settings_panel.setPreferredSize(new Dimension(settings_panel_width,
 				settings_panel_height));
 		
-		JCheckBox show_arrow_circles_check_box = new JCheckBox("Show circles", true);
+		JCheckBox show_arrow_circles_check_box = new JCheckBox("Show circles", show_arrow_circles_in_animation);
 		show_arrow_circles_check_box.addItemListener(new ItemListener(){
 			public void itemStateChanged(ItemEvent e) {
 				if(e.getStateChange() == 1){
@@ -409,7 +416,20 @@ public class appWindow extends JFrame{
 		});
 		show_arrow_circles_check_box.setFocusable(false);
 		
-		JCheckBox show_target_image_check_box = new JCheckBox("Show target image");
+		JCheckBox show_arrows_check_box = new JCheckBox("Show arrows", true);
+		show_arrows_check_box.addItemListener(new ItemListener(){
+			public void itemStateChanged(ItemEvent e) {
+				if(e.getStateChange() == 1){
+					show_arrows_in_animation = true;
+				}
+				else{
+					show_arrows_in_animation = false;
+				}
+			}
+		});
+		show_arrows_check_box.setFocusable(false);
+		
+		JCheckBox show_target_image_check_box = new JCheckBox("Show target image", show_target_function_in_animation);
 		show_target_image_check_box.addItemListener(new ItemListener(){
 			public void itemStateChanged(ItemEvent e) {
 				if(e.getStateChange() == 1){
@@ -422,21 +442,25 @@ public class appWindow extends JFrame{
 		});
 		show_target_image_check_box.setFocusable(false);
 		
-		JSlider animation_speed_slider = new JSlider(JSlider.HORIZONTAL, 0, 200, 5);
+		JPanel animation_speed_slider_panel = new JPanel(new BorderLayout());
+		animation_speed_slider_panel.add(new JLabel("Function evaluation resolution (Sort of the animation speed)"), BorderLayout.NORTH);
+		JSlider animation_speed_slider = new JSlider(JSlider.HORIZONTAL, 0, 400, 200);
 		animation_speed_slider.addChangeListener(new ChangeListener(){
 			public void stateChanged(ChangeEvent e) {
 				animation_drawing_speed = animation_speed_slider.getValue()/100.0;
 			}
 		});
+		animation_speed_slider_panel.add(animation_speed_slider);
 		animation_speed_slider.setFocusable(false);
-		animation_speed_slider.setMajorTickSpacing(50);
+		animation_speed_slider.setMajorTickSpacing(100);
 		animation_speed_slider.setMinorTickSpacing(1);
 		animation_speed_slider.setPaintTicks(true);
 		animation_speed_slider.setPaintLabels(true);
 		
 		settings_panel.add(show_arrow_circles_check_box);
+		settings_panel.add(show_arrows_check_box);
 		settings_panel.add(show_target_image_check_box);
-		settings_panel.add(animation_speed_slider);
+		settings_panel.add(animation_speed_slider_panel);
 		
 		this.add(settings_panel, BorderLayout.EAST);
 		
@@ -602,17 +626,22 @@ public class appWindow extends JFrame{
 			return;
 		}
 		
-		int circleRadius = renderData.getCircleRadius();
-		int x_pos = renderData.getX();
-		int y_pos = renderData.getY();
-		
-		g2.setStroke(new BasicStroke(2));
 		if(showRotationCircle){
+			int circleRadius = renderData.getCircleRadius();
+			int x_pos = renderData.getX();
+			int y_pos = renderData.getY();
+			
+			g2.setStroke(new BasicStroke(1));
+			Color circle_color = new Color(1, 1, 1, (float) 0.4);
+			g2.setColor(circle_color);
 			g2.drawOval(x_pos-circleRadius, y_pos-circleRadius, circleRadius*2, circleRadius*2);
 		}
 		
-		g2.fill(renderData.getArrowHeadPolygon());
-	//	g2.setStroke(new BasicStroke(1)); // Reset the stroke to default
+		if(show_arrows_in_animation) {
+			g2.setColor(Color.white);
+			g2.fill(renderData.getArrowHeadPolygon());
+		//	g2.setStroke(new BasicStroke(1)); // Reset the stroke to default
+		}
 	}
 	
 	public void drawImageArray(Graphics2D g2, ArrayList<Point> image_array, Color color){
@@ -646,7 +675,7 @@ public class appWindow extends JFrame{
 	}
 	
 	public void drawOriginMarker(Graphics2D g2) {
-		Color color = new Color(0, 0, 0, (float) 0.5); 
+		Color color = new Color(0, 0, 0, (float) 0.5);
 		g2.setColor(color);
 		g2.setStroke(new BasicStroke(1));
 		g2.drawLine(mathematics.originPixelX, mathematics.originPixelY-5, mathematics.originPixelX, mathematics.originPixelY+5);
