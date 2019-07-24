@@ -1,7 +1,9 @@
 package visualizeFourierSeries;
 
 import java.awt.BasicStroke;
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -9,6 +11,8 @@ import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -21,9 +25,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 
 public class appWindow extends JFrame{
@@ -31,10 +39,13 @@ public class appWindow extends JFrame{
 	private int drawing_brush_size = 2;
 	public double animation_drawing_speed = 2.0;
 	boolean show_target_function_in_animation = false;
+	boolean show_arrow_circles_in_animation = true;
 	JPanel rendering_panel;
 	public static int rendering_panel_width = 1400;
 	public static int rendering_panel_height = 1000; // atm the frame and rendering panel have the same size, need to add other containers
 									   // to have other size
+	public static int settings_panel_width = 400;
+	public static int settings_panel_height = rendering_panel_height;
 	public static int x = 0, y = 0;
 	private int prev_x = 0, prev_y = 0;
 	public static ArrayList<Point> drawn_image_array = new ArrayList<Point>();
@@ -60,7 +71,8 @@ public class appWindow extends JFrame{
 	public appWindow(String window_title) {
 		
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setSize(rendering_panel_width, rendering_panel_height); // 900 750
+		this.setSize(rendering_panel_width + settings_panel_width,
+				rendering_panel_height); // 900 750
 		this.setTitle(window_title);
 		this.setResizable(false);
 		this.setLocationRelativeTo(null);
@@ -100,13 +112,13 @@ public class appWindow extends JFrame{
 							drawImageArray(g2, drawn_image_array, color1);
 						}
 						
-						if(true){
-							g2.setColor(Color.white);
-							for(int i = 0; i < arrow_circle_render_data_array.size(); i++){
-								drawArrow(g2, arrow_circle_render_data_array.get(i), true);
-							}
-							arrow_calculations_done = false;
+						
+						g2.setColor(Color.white);
+						for(int i = 0; i < arrow_circle_render_data_array.size(); i++){
+							drawArrow(g2, arrow_circle_render_data_array.get(i), show_arrow_circles_in_animation);
 						}
+						arrow_calculations_done = false;
+						
 						
 												
 						if(fourier_series_drawn_image_array.size() > 1){
@@ -130,6 +142,7 @@ public class appWindow extends JFrame{
 				
 			}
 		};
+		rendering_panel.setPreferredSize(new Dimension(rendering_panel_width, rendering_panel_height)); // 900 750
 		
 		
 		rendering_panel.addMouseMotionListener(new MouseMotionListener() {
@@ -376,7 +389,56 @@ public class appWindow extends JFrame{
 			showSelectionButtons(true);
 		}
 		
-		this.add(rendering_panel);
+		this.add(rendering_panel, BorderLayout.WEST);
+		
+		JPanel settings_panel = new JPanel();
+		settings_panel.setBackground(Color.green);
+		settings_panel.setPreferredSize(new Dimension(settings_panel_width,
+				settings_panel_height));
+		
+		JCheckBox show_arrow_circles_check_box = new JCheckBox("Show circles", true);
+		show_arrow_circles_check_box.addItemListener(new ItemListener(){
+			public void itemStateChanged(ItemEvent e) {
+				if(e.getStateChange() == 1){
+					show_arrow_circles_in_animation = true;
+				}
+				else{
+					show_arrow_circles_in_animation = false;
+				}
+			}
+		});
+		show_arrow_circles_check_box.setFocusable(false);
+		
+		JCheckBox show_target_image_check_box = new JCheckBox("Show target image");
+		show_target_image_check_box.addItemListener(new ItemListener(){
+			public void itemStateChanged(ItemEvent e) {
+				if(e.getStateChange() == 1){
+					show_target_function_in_animation = true;
+				}
+				else{
+					show_target_function_in_animation = false;
+				}
+			}
+		});
+		show_target_image_check_box.setFocusable(false);
+		
+		JSlider animation_speed_slider = new JSlider(JSlider.HORIZONTAL, 0, 200, 5);
+		animation_speed_slider.addChangeListener(new ChangeListener(){
+			public void stateChanged(ChangeEvent e) {
+				animation_drawing_speed = animation_speed_slider.getValue()/100.0;
+			}
+		});
+		animation_speed_slider.setFocusable(false);
+		animation_speed_slider.setMajorTickSpacing(50);
+		animation_speed_slider.setMinorTickSpacing(1);
+		animation_speed_slider.setPaintTicks(true);
+		animation_speed_slider.setPaintLabels(true);
+		
+		settings_panel.add(show_arrow_circles_check_box);
+		settings_panel.add(show_target_image_check_box);
+		settings_panel.add(animation_speed_slider);
+		
+		this.add(settings_panel, BorderLayout.EAST);
 		
 		this.setVisible(true);
 	}
@@ -563,9 +625,7 @@ public class appWindow extends JFrame{
 			
 			g2.setStroke(new BasicStroke(drawing_brush_size));
 			g2.setColor(color);
-			//g2.drawLine(current_x, current_y, next_x, next_y);
-			drawLineWithSpatialAntiAliasing(g2, current_x, current_y, next_x, next_y);
-			
+			g2.drawLine(current_x, current_y, next_x, next_y);
 			
 			// Reset the stroke to default
 			g2.setStroke(new BasicStroke(1));
@@ -585,10 +645,6 @@ public class appWindow extends JFrame{
 		}
 	}
 	
-	public void drawLineWithSpatialAntiAliasing(Graphics2D g2, int start_x, int start_y, int end_x, int end_y) {
-		g2.drawLine(start_x, start_y, end_x, end_y);
-	}
-	
 	public void drawOriginMarker(Graphics2D g2) {
 		Color color = new Color(0, 0, 0, (float) 0.5); 
 		g2.setColor(color);
@@ -606,8 +662,8 @@ public class appWindow extends JFrame{
 		mathematics.iterateAddingMoreSamplesToFunction(5); // Make this input dependant on number of fourier terms ???
 		mathematics.calculateFourierSeriesCoefficients();
 		
-		Thread renderThread = new Thread(new renderLoop());
-		renderThread.start();
+		Thread render_thread = new Thread(new renderLoop());
+		render_thread.start();
 	}
 	
 	public void render(){
