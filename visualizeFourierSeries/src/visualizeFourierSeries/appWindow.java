@@ -563,7 +563,10 @@ public class appWindow extends JFrame{
 			
 			g2.setStroke(new BasicStroke(drawing_brush_size));
 			g2.setColor(color);
-			g2.drawLine(current_x, current_y, next_x, next_y);
+			//g2.drawLine(current_x, current_y, next_x, next_y);
+			drawLineWithSpatialAntiAliasing(g2, current_x, current_y, next_x, next_y);
+			
+			
 			// Reset the stroke to default
 			g2.setStroke(new BasicStroke(1));
 		}
@@ -580,6 +583,10 @@ public class appWindow extends JFrame{
 			rendering_panel.remove(trace_input_image_button);
 			rendering_panel.remove(elephant_image_demo_button);
 		}
+	}
+	
+	public void drawLineWithSpatialAntiAliasing(Graphics2D g2, int start_x, int start_y, int end_x, int end_y) {
+		g2.drawLine(start_x, start_y, end_x, end_y);
 	}
 	
 	public void drawOriginMarker(Graphics2D g2) {
