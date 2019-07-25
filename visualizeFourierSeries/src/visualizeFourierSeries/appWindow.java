@@ -23,6 +23,7 @@ import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Hashtable;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -444,7 +445,7 @@ public class appWindow extends JFrame{
 		
 		JPanel animation_speed_slider_panel = new JPanel(new BorderLayout());
 		animation_speed_slider_panel.add(new JLabel("Function evaluation resolution (Sort of the animation speed)"), BorderLayout.NORTH);
-		JSlider animation_speed_slider = new JSlider(JSlider.HORIZONTAL, 0, 400, 200);
+		JSlider animation_speed_slider = new JSlider(JSlider.HORIZONTAL, 0, 400, (int) (animation_drawing_speed*100) );
 		animation_speed_slider.addChangeListener(new ChangeListener(){
 			public void stateChanged(ChangeEvent e) {
 				animation_drawing_speed = animation_speed_slider.getValue()/100.0;
@@ -457,10 +458,33 @@ public class appWindow extends JFrame{
 		animation_speed_slider.setPaintTicks(true);
 		animation_speed_slider.setPaintLabels(true);
 		
+		JPanel FPS_slider_panel = new JPanel(new BorderLayout());
+		FPS_slider_panel.add(new JLabel("Frames per second"), BorderLayout.NORTH);
+		JSlider FPS_slider = new JSlider(JSlider.HORIZONTAL, 0, 200, renderLoop.TARGET_FPS);
+		FPS_slider.addChangeListener(new ChangeListener(){
+			public void stateChanged(ChangeEvent e) {
+				renderLoop.TARGET_FPS = FPS_slider.getValue();
+				if(renderLoop.TARGET_FPS != 0) {
+					renderLoop.RENDER_WAIT_TIME = 1000000000/renderLoop.TARGET_FPS;
+				}
+				else {
+					renderLoop.RENDER_WAIT_TIME = Long.MAX_VALUE;
+				}
+			}
+		});
+		FPS_slider_panel.add(FPS_slider);
+		FPS_slider.setFocusable(false);
+		FPS_slider.setMajorTickSpacing(50);
+		FPS_slider.setMinorTickSpacing(1);
+		FPS_slider.setPaintTicks(true);
+		FPS_slider.setPaintLabels(true);
+		
+		
 		settings_panel.add(show_arrow_circles_check_box);
 		settings_panel.add(show_arrows_check_box);
 		settings_panel.add(show_target_image_check_box);
 		settings_panel.add(animation_speed_slider_panel);
+		settings_panel.add(FPS_slider_panel);
 		
 		this.add(settings_panel, BorderLayout.EAST);
 		

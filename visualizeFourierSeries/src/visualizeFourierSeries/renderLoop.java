@@ -4,8 +4,8 @@ import java.awt.Point;
 
 public class renderLoop implements Runnable{
 	
-	final int TARGET_FPS = 144;
-	final long RENDER_WAIT_TIME = 1000000000/TARGET_FPS;
+	public static int TARGET_FPS = 144;
+	public static long RENDER_WAIT_TIME = 1000000000/TARGET_FPS;
 	double independent_variable = 0;
 	
 	public void run(){
