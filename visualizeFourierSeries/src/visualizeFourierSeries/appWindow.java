@@ -409,9 +409,11 @@ public class appWindow extends JFrame{
 			public void itemStateChanged(ItemEvent e) {
 				if(e.getStateChange() == 1){
 					show_arrow_circles_in_animation = true;
+					render();
 				}
 				else{
 					show_arrow_circles_in_animation = false;
+					render();
 				}
 			}
 		});
@@ -422,9 +424,11 @@ public class appWindow extends JFrame{
 			public void itemStateChanged(ItemEvent e) {
 				if(e.getStateChange() == 1){
 					show_arrows_in_animation = true;
+					render();
 				}
 				else{
 					show_arrows_in_animation = false;
+					render();
 				}
 			}
 		});
@@ -435,9 +439,11 @@ public class appWindow extends JFrame{
 			public void itemStateChanged(ItemEvent e) {
 				if(e.getStateChange() == 1){
 					show_target_function_in_animation = true;
+					render();
 				}
 				else{
 					show_target_function_in_animation = false;
+					render();
 				}
 			}
 		});
@@ -526,10 +532,10 @@ public class appWindow extends JFrame{
 		double angle_in_radians = complex_value.getArgument();
 						
 		// Arrow proportions
-		double head_arrow_x_length = pixel_magnitude/3;
-		double head_arrow_half_y_length = 0.8*head_arrow_x_length; // Could calculate these once and save them as to not calculate them over and over???
-		double body_arrow_x_length = (2*pixel_magnitude)/3;
-		double body_arrow_half_y_length = 0.15*head_arrow_half_y_length;
+		double head_arrow_x_length = Math.min(pixel_magnitude/4, 30);
+		double head_arrow_half_y_length = 0.55*head_arrow_x_length; // Could calculate these once and save them as to not calculate them over and over???
+		double body_arrow_x_length = pixel_magnitude - head_arrow_x_length;
+		double body_arrow_half_y_length = 0.1*head_arrow_half_y_length;
 		
 		// Arrowhead calculations
 		Point2D.Double point1 = mathematics.pointDouble2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point2D.Double( body_arrow_x_length, -head_arrow_half_y_length ));
