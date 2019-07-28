@@ -50,7 +50,7 @@ public class imageInputFunctions {
 				}
 			}
 			
-			thresholdImage(normalized_image_array, 0.5);
+			thresholdImage(normalized_image_array, 0.2);
 			output_image = thresholdImageToBufferedImage(normalized_image_array);
 			
 			
@@ -194,21 +194,40 @@ public class imageInputFunctions {
 	}
 	
 	public static void printTracedArrayInSavableFormat() {
-		
 		for(int i = 0; i < traced_image_array.size(); i++) {
-			System.out.print("new Point(" + traced_image_array.get(i).x + "," + traced_image_array.get(i).y + "), ");
-			if((i+1)%10 == 0) {
-				System.out.print("\n");
-			}
+			System.out.println(traced_image_array.get(i).x + "," + traced_image_array.get(i).y);
 		}
-		System.out.print("\n");
-		
-		
 	}
 	
 	public static void loadElephantImage(){
 		File file = new File("src\\visualizeFourierSeries\\elephant_drawing_data.txt");
 		
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(file));
+			ArrayList<Point> result_array = new ArrayList<Point>();
+			
+			String current_string;
+			
+			while( (current_string = br.readLine()) != null ){
+				if(current_string.contains(",")){
+					String[] string_parts = current_string.split("\\,");
+					result_array.add(new Point(2*Integer.parseInt(string_parts[0]), 2*Integer.parseInt(string_parts[1])));
+				}
+				else{
+					throw new IllegalArgumentException("String " + current_string + " does not contain ,");
+				}
+			}
+			Main.app_window.drawn_image_array = result_array;
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	public static void loadEighthNoteImage(){
+		File file = new File("src\\visualizeFourierSeries\\eighth_note_data.txt");
 		
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(file));

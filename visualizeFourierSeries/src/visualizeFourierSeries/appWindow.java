@@ -38,27 +38,34 @@ import javax.swing.event.ChangeListener;
 
 public class appWindow extends JFrame{
 	
+	// Setting parameters
 	private int drawing_brush_size = 2;
 	public double animation_drawing_speed = 2.0;
 	boolean show_target_function_in_animation = false;
 	boolean show_arrow_circles_in_animation = true;
 	boolean show_arrows_in_animation = true;
 	JPanel rendering_panel;
+	
+	// Panel sizes
 	public static int rendering_panel_width = 1400;
-	public static int rendering_panel_height = 1000; // atm the frame and rendering panel have the same size, need to add other containers
-									   // to have other size
+	public static int rendering_panel_height = 1000;
 	public static int settings_panel_width = 400;
 	public static int settings_panel_height = rendering_panel_height;
+	
+	// Global data
 	public static int x = 0, y = 0;
-	private int prev_x = 0, prev_y = 0;
 	public static ArrayList<Point> drawn_image_array = new ArrayList<Point>();
 	ArrayList<Point> fourier_series_drawn_image_array = new ArrayList<Point>();
 	ArrayList<arrowAndCircleRenderData> arrow_circle_render_data_array = new ArrayList<arrowAndCircleRenderData>();
 	public static int initial_drawn_image_array_size;
 	
+	// Selection buttons
 	JButton draw_image_button;
 	JButton trace_input_image_button;
 	JButton elephant_image_demo_button;
+	
+	// Standard format to output decimals
+	DecimalFormat numberFormat = new DecimalFormat("0.0000");
 	
 	// Different application status values
 	public static final int SELECTION_SCREEN = 1;
@@ -66,20 +73,22 @@ public class appWindow extends JFrame{
 	public static final int RENDERING_FOURIER_ANIMATION = 3;
 	public static final int SELECTING_TRACING_INPUT_IMAGE_START = 4;
 	public static final int TRACING_INPUT_IMAGE = 5;
-	
 	private int current_app_status = SELECTION_SCREEN;
 	
+	// Flag used for rendering
 	boolean arrow_calculations_done = false;
 
 	public appWindow(String window_title) {
 		
+		// Setup the application window
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setSize(rendering_panel_width + settings_panel_width,
-				rendering_panel_height); // 900 750
+				rendering_panel_height);
 		this.setTitle(window_title);
 		this.setResizable(false);
 		this.setLocationRelativeTo(null);
 		
+		// The main panel used for drawing and rendering
 		rendering_panel = new JPanel() {
 			protected void paintComponent(Graphics g) {
 				Graphics2D g2 = (Graphics2D) g;
@@ -98,7 +107,6 @@ public class appWindow extends JFrame{
 						g2.drawString("Mouse position: " + x + ", " + y, 40, 40);
 						
 						complexNumber complex_value = mathematics.pixelToComplexNumber(new Point(x, y));
-						DecimalFormat numberFormat = new DecimalFormat("0.0000");
 						if(complex_value.getImagPart() < 0) {
 							g2.drawString("Complex value: " + numberFormat.format(complex_value.getRealPart()) + "-" + numberFormat.format(Math.abs(complex_value.getImagPart())) + "i", 40, 80);
 						}
@@ -114,11 +122,9 @@ public class appWindow extends JFrame{
 						this.setBackground(Color.black);
 						
 						if(show_target_function_in_animation) {
-							// could be put in a function since similar code is used in the other switch-case
 							Color color1 = new Color(0, (float) 1, 0, (float) 0.4);
 							drawImageArray(g2, drawn_image_array, color1);
 						}
-						
 						
 						g2.setColor(Color.white);
 						for(int i = 0; i < arrow_circle_render_data_array.size(); i++){
@@ -155,9 +161,6 @@ public class appWindow extends JFrame{
 		rendering_panel.addMouseMotionListener(new MouseMotionListener() {
 
 			public void mouseDragged(MouseEvent e) {
-
-				prev_x = x;
-				prev_y = y;
 				
 				x = e.getX();
 				y = e.getY();
@@ -170,8 +173,6 @@ public class appWindow extends JFrame{
 			}
 
 			public void mouseMoved(MouseEvent e) {
-				prev_x = x;
-				prev_y = y;
 				
 				x = e.getX();
 				y = e.getY();
@@ -205,9 +206,7 @@ public class appWindow extends JFrame{
 			public void mouseReleased(MouseEvent arg0) {
 				
 				if(current_app_status == DRAWING_IMAGE){
-					System.out.println("Released mouse button");
 					current_app_status = RENDERING_FOURIER_ANIMATION;
-					
 					calculateAndstartFourierAnimation();
 				}
 			}
@@ -219,121 +218,119 @@ public class appWindow extends JFrame{
 			public void keyTyped(KeyEvent e) {}
 
 			public void keyPressed(KeyEvent e) {
-				System.out.println("Key pressed");
-				
 				switch(current_app_status){
-				case TRACING_INPUT_IMAGE:
-					Point previous_point = imageInputFunctions.traced_image_array.get(imageInputFunctions.traced_image_array.size()-1);
-					Point current_point = null;
-					
-					switch(e.getKeyCode()) {
-					case 81: // Q key
-						current_point = new Point(previous_point.x-1, previous_point.y-1);
-						imageInputFunctions.traced_image_array.add(current_point);
-						render();
-						break;
-					case 87: // W key
-						current_point = new Point(previous_point.x, previous_point.y-1);
-						imageInputFunctions.traced_image_array.add(current_point);
-						render();
-						break;
-					case 69: // E key
-						current_point = new Point(previous_point.x+1, previous_point.y-1);
-						imageInputFunctions.traced_image_array.add(current_point);
-						render();
-						break;
-					case 68: // D key
-						current_point = new Point(previous_point.x+1, previous_point.y);
-						imageInputFunctions.traced_image_array.add(current_point);
-						render();
-						break;
-					case 67: // C key
-						current_point = new Point(previous_point.x+1, previous_point.y+1);
-						imageInputFunctions.traced_image_array.add(current_point);
-						render();
-						break;
-					case 88: // X key
-						current_point = new Point(previous_point.x, previous_point.y+1);
-						imageInputFunctions.traced_image_array.add(current_point);
-						render();
-						break;
-					case 90: // Z key
-						current_point = new Point(previous_point.x-1, previous_point.y+1);
-						imageInputFunctions.traced_image_array.add(current_point);
-						render();
-						break;
-					case 65: // A key
-						current_point = new Point(previous_point.x-1, previous_point.y);
-						imageInputFunctions.traced_image_array.add(current_point);
-						render();
-						break;
-					case 10: // Enter
-						imageInputFunctions.printTracedArrayInSavableFormat();
-						break;
-					case 109: // right "-"-key
-						imageInputFunctions.zoomOut();
-						render();
-						break;
-					case 107: // right "+"-key
-						imageInputFunctions.zoomIn();
-						render();
-						break;
-					case 37: // left arrow
-						imageInputFunctions.zoom_x_pos = Math.max(0, imageInputFunctions.zoom_x_pos-1);
-						render();
-						break;
-					case 38: // up arrow
-						imageInputFunctions.zoom_y_pos = Math.max(0, imageInputFunctions.zoom_y_pos-1);
-						render();
-						break;
-					case 39: // right arrow
-						int max_x_pos = imageInputFunctions.output_image.getWidth()-imageInputFunctions.preview_rectangle_width;
-						imageInputFunctions.zoom_x_pos = Math.min(max_x_pos, imageInputFunctions.zoom_x_pos+1);
-						render();
-						break;
-					case 40: // down arrow
-						int max_y_pos = imageInputFunctions.output_image.getHeight()-imageInputFunctions.preview_rectangle_height;
-						imageInputFunctions.zoom_y_pos = Math.min(max_y_pos, imageInputFunctions.zoom_y_pos+1);
-						render();
-						break;
-					case 27: // esc
-						if(imageInputFunctions.traced_image_array.size() > 1) {
-							imageInputFunctions.traced_image_array.remove(imageInputFunctions.traced_image_array.size()-1);
+					case TRACING_INPUT_IMAGE:
+						Point previous_point = imageInputFunctions.traced_image_array.get(imageInputFunctions.traced_image_array.size()-1);
+						Point current_point = null;
+						
+						switch(e.getKeyCode()) {
+						case 81: // Q key
+							current_point = new Point(previous_point.x-1, previous_point.y-1);
+							imageInputFunctions.traced_image_array.add(current_point);
+							render();
+							break;
+						case 87: // W key
+							current_point = new Point(previous_point.x, previous_point.y-1);
+							imageInputFunctions.traced_image_array.add(current_point);
+							render();
+							break;
+						case 69: // E key
+							current_point = new Point(previous_point.x+1, previous_point.y-1);
+							imageInputFunctions.traced_image_array.add(current_point);
+							render();
+							break;
+						case 68: // D key
+							current_point = new Point(previous_point.x+1, previous_point.y);
+							imageInputFunctions.traced_image_array.add(current_point);
+							render();
+							break;
+						case 67: // C key
+							current_point = new Point(previous_point.x+1, previous_point.y+1);
+							imageInputFunctions.traced_image_array.add(current_point);
+							render();
+							break;
+						case 88: // X key
+							current_point = new Point(previous_point.x, previous_point.y+1);
+							imageInputFunctions.traced_image_array.add(current_point);
+							render();
+							break;
+						case 90: // Z key
+							current_point = new Point(previous_point.x-1, previous_point.y+1);
+							imageInputFunctions.traced_image_array.add(current_point);
+							render();
+							break;
+						case 65: // A key
+							current_point = new Point(previous_point.x-1, previous_point.y);
+							imageInputFunctions.traced_image_array.add(current_point);
+							render();
+							break;
+						case 10: // Enter
+							imageInputFunctions.printTracedArrayInSavableFormat();
+							break;
+						case 109: // right "-"-key
+							imageInputFunctions.zoomOut();
+							render();
+							break;
+						case 107: // right "+"-key
+							imageInputFunctions.zoomIn();
+							render();
+							break;
+						case 37: // left arrow
+							imageInputFunctions.zoom_x_pos = Math.max(0, imageInputFunctions.zoom_x_pos-1);
+							render();
+							break;
+						case 38: // up arrow
+							imageInputFunctions.zoom_y_pos = Math.max(0, imageInputFunctions.zoom_y_pos-1);
+							render();
+							break;
+						case 39: // right arrow
+							int max_x_pos = imageInputFunctions.output_image.getWidth()-imageInputFunctions.preview_rectangle_width;
+							imageInputFunctions.zoom_x_pos = Math.min(max_x_pos, imageInputFunctions.zoom_x_pos+1);
+							render();
+							break;
+						case 40: // down arrow
+							int max_y_pos = imageInputFunctions.output_image.getHeight()-imageInputFunctions.preview_rectangle_height;
+							imageInputFunctions.zoom_y_pos = Math.min(max_y_pos, imageInputFunctions.zoom_y_pos+1);
+							render();
+							break;
+						case 27: // esc
+							if(imageInputFunctions.traced_image_array.size() > 1) {
+								imageInputFunctions.traced_image_array.remove(imageInputFunctions.traced_image_array.size()-1);
+							}
+							render();
+							break;
 						}
-						render();
 						break;
-					}
-					break;
-				case SELECTING_TRACING_INPUT_IMAGE_START:
+					case SELECTING_TRACING_INPUT_IMAGE_START:
 					switch(e.getKeyCode()) {
-					case 109:
-						imageInputFunctions.zoomOut();
-						render();
-						break;
-					case 107:
-						imageInputFunctions.zoomIn();
-						render();
-						break;
-					case 37:
-						imageInputFunctions.zoom_x_pos = Math.max(0, imageInputFunctions.zoom_x_pos-1);
-						render();
-						break;
-					case 38:
-						imageInputFunctions.zoom_y_pos = Math.max(0, imageInputFunctions.zoom_y_pos-1);
-						render();
-						break;
-					case 39:
-						int max_x_pos = imageInputFunctions.output_image.getWidth()-imageInputFunctions.preview_rectangle_width;
-						imageInputFunctions.zoom_x_pos = Math.min(max_x_pos, imageInputFunctions.zoom_x_pos+1);
-						render();
-						break;
-					case 40:
-						int max_y_pos = imageInputFunctions.output_image.getHeight()-imageInputFunctions.preview_rectangle_height;
-						imageInputFunctions.zoom_y_pos = Math.min(max_y_pos, imageInputFunctions.zoom_y_pos+1);
-						render();
-						break;
+						case 109: // right "-"-key
+							imageInputFunctions.zoomOut();
+							render();
+							break;
+						case 107: // right "+"-key
+							imageInputFunctions.zoomIn();
+							render();
+							break;
+						case 37: // left arrow
+							imageInputFunctions.zoom_x_pos = Math.max(0, imageInputFunctions.zoom_x_pos-1);
+							render();
+							break;
+						case 38: // up arrow
+							imageInputFunctions.zoom_y_pos = Math.max(0, imageInputFunctions.zoom_y_pos-1);
+							render();
+							break;
+						case 39: // right arrow
+							int max_x_pos = imageInputFunctions.output_image.getWidth()-imageInputFunctions.preview_rectangle_width;
+							imageInputFunctions.zoom_x_pos = Math.min(max_x_pos, imageInputFunctions.zoom_x_pos+1);
+							render();
+							break;
+						case 40: // down arrow
+							int max_y_pos = imageInputFunctions.output_image.getHeight()-imageInputFunctions.preview_rectangle_height;
+							imageInputFunctions.zoom_y_pos = Math.min(max_y_pos, imageInputFunctions.zoom_y_pos+1);
+							render();
+							break;
 					}
-					break;
+						break;
 				}
 				
 			}
@@ -533,7 +530,7 @@ public class appWindow extends JFrame{
 						
 		// Arrow proportions
 		double head_arrow_x_length = Math.min(pixel_magnitude/4, 30);
-		double head_arrow_half_y_length = 0.55*head_arrow_x_length; // Could calculate these once and save them as to not calculate them over and over???
+		double head_arrow_half_y_length = 0.55*head_arrow_x_length;
 		double body_arrow_x_length = pixel_magnitude - head_arrow_x_length;
 		double body_arrow_half_y_length = 0.1*head_arrow_half_y_length;
 		
@@ -566,84 +563,6 @@ public class appWindow extends JFrame{
 		Point arrow_end_point = new Point( (int) Math.round(point2.x), (int) Math.round(point2.y));
 		arrowAndCircleRenderData data = new arrowAndCircleRenderData((int) Math.round(x_translation), 
 				(int) Math.round(y_translation), arrow_end_point, arrow_polygon, circle_radius);
-		
-		return data;
-	}
-	
-	public arrowAndCircleRenderData calculateArrow2(complexNumber complex_value, int shift_index){
-		// TEMPORARY TEST
-		Point exact_point = mathematics.calculateEndPoint(
-				mathematics.shiftIndexToVectorSumIndex(shift_index));
-		
-		
-		// Calculate the magnitude of the arrow in unit of pixels
-		double complex_magnitude = complex_value.getMagnitude();
-		double pixel_magnitude = mathematics.complexMagnitudeToPixelMagnitude(complex_magnitude);
-						
-		// If the arrow is shorter than a pixel, don't draw it
-		if(pixel_magnitude < 1){
-			//return null;
-		}
-		
-		// The offset the arrow should be translated
-		int x_translation = mathematics.originPixelX;
-		int y_translation = mathematics.originPixelY;
-		if(shift_index != 0){
-			int vector_sum_index = mathematics.shiftIndexToVectorSumIndex(shift_index);
-			Point previous_end_point = arrow_circle_render_data_array.get(vector_sum_index-1).getArrowEndPoint();
-			
-			if(Math.abs(previous_end_point.x - exact_point.x) > 1 || Math.abs(previous_end_point.y - exact_point.y) > 1 ){
-				//System.out.println(Math.abs(previous_end_point.x - exact_point.x) + ", " + 
-				//		Math.abs(previous_end_point.y - exact_point.y));
-			}
-			
-			x_translation = previous_end_point.x;
-			y_translation = previous_end_point.y;
-		}
-		
-		// Calculate the angle of the arrow
-		double angle_in_radians = complex_value.getArgument();
-				
-		// Arrow proportions
-		double head_arrow_x_length = pixel_magnitude/3;
-		double head_arrow_half_y_length = 0.8*head_arrow_x_length; // Could calculate these once and save them as to not calculate them over and over???
-		double body_arrow_x_length = (2*pixel_magnitude)/3;
-		double body_arrow_half_y_length = 0.15*head_arrow_half_y_length;
-		
-		// Arrowhead calculations
-		Point2D.Double point1 = mathematics.pointDouble2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point2D.Double( body_arrow_x_length, -head_arrow_half_y_length ));
-		Point2D.Double point2 = mathematics.pointDouble2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point2D.Double( (body_arrow_x_length+head_arrow_x_length), 0 ));
-		Point2D.Double point3 = mathematics.pointDouble2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point2D.Double( body_arrow_x_length, head_arrow_half_y_length ));
-		Point2D.Double point4 = mathematics.pointDouble2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point2D.Double( body_arrow_x_length, body_arrow_half_y_length ));
-		Point2D.Double point5 = mathematics.pointDouble2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point2D.Double( 0, body_arrow_half_y_length ));
-		Point2D.Double point6 = mathematics.pointDouble2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point2D.Double( 0, -body_arrow_half_y_length ));
-		Point2D.Double point7 = mathematics.pointDouble2x2MatrixMult(mathematics.rotationMatrix(angle_in_radians), new Point2D.Double( body_arrow_x_length, -body_arrow_half_y_length ));
-		
-		point1 = new Point2D.Double(point1.x+x_translation, -point1.y+y_translation);
-		point2 = new Point2D.Double(point2.x+x_translation, -point2.y+y_translation);
-		point3 = new Point2D.Double(point3.x+x_translation, -point3.y+y_translation);
-		point4 = new Point2D.Double(point4.x+x_translation, -point4.y+y_translation);
-		point5 = new Point2D.Double(point5.x+x_translation, -point5.y+y_translation);
-		point6 = new Point2D.Double(point6.x+x_translation, -point6.y+y_translation);
-		point7 = new Point2D.Double(point7.x+x_translation, -point7.y+y_translation);
-						
-		int[] xPoints = {(int) Math.round(point1.x), (int) Math.round(point2.x), (int) Math.round(point3.x), 
-				(int) Math.round(point4.x), (int) Math.round(point5.x), (int) Math.round(point6.x), (int) Math.round(point7.x)};
-		int[] yPoints = {(int) Math.round(point1.y), (int) Math.round(point2.y), (int) Math.round(point3.y), 
-				(int) Math.round(point4.y), (int) Math.round(point5.y), (int) Math.round(point6.y), (int) Math.round(point7.y)};
-		Polygon arrow_polygon = new Polygon(xPoints, yPoints, 7);
-				
-		// Circle radius calculations
-		int circle_radius = (int) pixel_magnitude;
-		
-		// TEMPORARY TEST
-		if(mathematics.shiftIndexToVectorSumIndex(shift_index) == 20){
-			System.out.println(Math.abs(point2.x - exact_point.x) + ", " + 
-					Math.abs(point2.y - exact_point.y) + ", " + mathematics.shiftIndexToVectorSumIndex(shift_index));
-		}
-		
-		Point arrow_end_point = new Point( (int) Math.round(point2.x), (int) Math.round(point2.y));
-		arrowAndCircleRenderData data = new arrowAndCircleRenderData(x_translation, y_translation, arrow_end_point, arrow_polygon, circle_radius);
 		
 		return data;
 	}

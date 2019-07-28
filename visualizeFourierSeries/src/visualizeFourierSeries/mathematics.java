@@ -8,6 +8,7 @@ import java.util.Collections;
 public class mathematics {
 	
 	public static int nbr_of_fourier_terms = 501;
+	public static double independent_variable = 0;
 	public static complexNumber[] complexFunctionToApproximate;
 	public static int originPixelX = appWindow.rendering_panel_width/2;
 	public static int originPixelY = appWindow.rendering_panel_height/2;
@@ -82,6 +83,7 @@ public class mathematics {
 	
 	public static void iterateAddingMoreSamplesToFunction(int number_of_iterations) {
 		appWindow.initial_drawn_image_array_size = appWindow.drawn_image_array.size();
+		System.out.println(appWindow.initial_drawn_image_array_size);
 		for(int i = 1; i <= number_of_iterations; i++) {
 			mathematics.addMoreSamplesToFunction();
 		}
@@ -186,8 +188,8 @@ public class mathematics {
 	
 	public static complexNumber pixelToComplexNumber(Point pixel){
 		
-		double real_part = ( (double)((int) pixel.getX()) - originPixelX ) / pixelNormalizingFactor;
-		double imag_part = -( (double)((int) pixel.getY()) - originPixelY ) / pixelNormalizingFactor;
+		double real_part = ( (double)( pixel.getX()) - originPixelX ) / pixelNormalizingFactor;
+		double imag_part = -( (double)( pixel.getY()) - originPixelY ) / pixelNormalizingFactor;
 		
 		return new complexNumber(real_part, imag_part);
 	}

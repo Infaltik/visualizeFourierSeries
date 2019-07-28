@@ -6,13 +6,12 @@ public class renderLoop implements Runnable{
 	
 	public static int TARGET_FPS = 144;
 	public static long RENDER_WAIT_TIME = 1000000000/TARGET_FPS;
-	double independent_variable = 0;
 	
 	public void run(){
 		long last_time_rendered = System.nanoTime();
 		
 		// Run the animation for one loop of the complex function
-		while(independent_variable <= 1.05){
+		while(mathematics.independent_variable <= 1.05){
 			long current_time = System.nanoTime();
 			long delta_render = current_time - last_time_rendered;
 			
@@ -21,7 +20,7 @@ public class renderLoop implements Runnable{
 			
 			if(!Main.app_window.arrow_calculations_done){
 				// Calculations for determining the fourier series
-				mathematics.calculateFourierSeriesTerms(independent_variable);
+				mathematics.calculateFourierSeriesTerms(mathematics.independent_variable);
 				
 				// Add the current function value to the fourier series drawing array
 				Point end_point_pixel = mathematics.calculateEndPoint();
@@ -30,10 +29,9 @@ public class renderLoop implements Runnable{
 				// Rendering calculations
 				Main.app_window.arrowPreRenderCalculations();
 				
-				
 				// Increase the function input value
 				//independent_variable += 0.001;
-				independent_variable += Main.app_window.animation_drawing_speed/Main.app_window.initial_drawn_image_array_size;
+				mathematics.independent_variable += Main.app_window.animation_drawing_speed/Main.app_window.initial_drawn_image_array_size;
 			}
 			
 			try {
