@@ -26,7 +26,6 @@ public class Main {
 			e.printStackTrace();
 		}
 		//imageInputFunctions.readImage("src\\visualizeFourierSeries\\output_manually_modified.png");
-		imageInputFunctions.loadTestCircle(100);
 		mathematics.createShiftIndices();
 	}
 

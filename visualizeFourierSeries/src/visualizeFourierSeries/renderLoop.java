@@ -4,7 +4,7 @@ import java.awt.Point;
 
 public class renderLoop implements Runnable{
 	
-	public static int TARGET_FPS = 144;
+	public static int TARGET_FPS = 200;
 	public static long RENDER_WAIT_TIME = 1000000000/TARGET_FPS;
 	
 	public void run(){
@@ -15,9 +15,9 @@ public class renderLoop implements Runnable{
 			long current_time = System.nanoTime();
 			long delta_render = current_time - last_time_rendered;
 			
+			
 			// Do the calculations for the fourier series and rendering so that
 			// the only thing left to do is to render the screen
-			
 			if(!Main.app_window.arrow_calculations_done){
 				// Calculations for determining the fourier series
 				mathematics.calculateFourierSeriesTerms(mathematics.independent_variable);
@@ -30,7 +30,6 @@ public class renderLoop implements Runnable{
 				Main.app_window.arrowPreRenderCalculations();
 				
 				// Increase the function input value
-				//independent_variable += 0.001;
 				mathematics.independent_variable += Main.app_window.animation_drawing_speed/Main.app_window.initial_drawn_image_array_size;
 			}
 			

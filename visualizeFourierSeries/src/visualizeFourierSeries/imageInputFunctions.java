@@ -219,6 +219,7 @@ public class imageInputFunctions {
 					throw new IllegalArgumentException("String " + current_string + " does not contain ,");
 				}
 			}
+			br.close();
 			Main.app_window.drawn_image_array = result_array;
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -246,6 +247,7 @@ public class imageInputFunctions {
 					throw new IllegalArgumentException("String " + current_string + " does not contain ,");
 				}
 			}
+			br.close();
 			Main.app_window.drawn_image_array = result_array;
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -253,17 +255,6 @@ public class imageInputFunctions {
 			e.printStackTrace();
 		}
 		
-	}
-	
-	public static void loadTestCircle(int number_of_samples) {
-		//ArrayList<Point2D.Double> result_array = new ArrayList<Point2D.Double>();
-		ArrayList<Point2D.Double> result_array = new ArrayList<Point2D.Double>();
-		double step_size = 2*Math.PI/number_of_samples;
-		double magnitude = 50;
-		for(int i = 0; i < number_of_samples; i++) {
-			result_array.add(new Point2D.Double( mathematics.originPixelX + (magnitude*Math.cos(i*step_size)), mathematics.originPixelY + (magnitude*Math.sin(i*step_size))));
-		}
-		Main.app_window.test = result_array;
 	}
 	
 

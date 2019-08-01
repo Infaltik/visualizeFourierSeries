@@ -41,7 +41,7 @@ public class appWindow extends JFrame{
 	
 	// Setting parameters
 	private int drawing_brush_size = 2;
-	public double animation_drawing_speed = 2.0;
+	public double animation_drawing_speed = 1.0;
 	boolean show_target_function_in_animation = false;
 	boolean show_arrow_circles_in_animation = true;
 	boolean show_arrows_in_animation = true;
@@ -57,7 +57,6 @@ public class appWindow extends JFrame{
 	public static int x = 0, y = 0;
 	public static ArrayList<Point> drawn_image_array = new ArrayList<Point>();
 	ArrayList<Point> fourier_series_drawn_image_array = new ArrayList<Point>();
-	public static ArrayList<Point2D.Double> test = new ArrayList<Point2D.Double>();
 	ArrayList<arrowAndCircleRenderData> arrow_circle_render_data_array = new ArrayList<arrowAndCircleRenderData>();
 	public static int initial_drawn_image_array_size;
 	
@@ -139,11 +138,6 @@ public class appWindow extends JFrame{
 						if(fourier_series_drawn_image_array.size() > 1){
 							drawImageArray(g2, fourier_series_drawn_image_array, Color.red);
 						}
-						
-					//	drawImageArrayTest(g2, test, Color.red);
-						drawImageArray2(g2, test, Color.red);
-						g2.drawOval(mathematics.originPixelX + 100, mathematics.originPixelY-50, 100, 100);
-						
 						
 						drawOriginMarker(g2);
 						break;
@@ -615,66 +609,6 @@ public class appWindow extends JFrame{
 			// Reset the stroke to default
 			g2.setStroke(new BasicStroke(1));
 		}
-	}
-	
-	public void drawImageArray2(Graphics2D g2, ArrayList<Point2D.Double> image_array, Color color){
-		int loop_length = image_array.size()/9;
-		GeneralPath path = new GeneralPath();
-		path.moveTo(image_array.get(0).getX(), image_array.get(0).getY());
-		
-		for(int i = 0; i < loop_length; i++){
-			double x1 = image_array.get(3*i+1).getX();
-			double y1 = image_array.get(3*i+1).getY();
-			double x2 = image_array.get(6*i+2).getX();
-			double y2 = image_array.get(6*i+2).getY();
-			double x3 = image_array.get(9*i+3).getX();
-			double y3 = image_array.get(9*i+3).getY();
-			
-			path.curveTo(x1, y1, x2, y2, x3, y3);
-		}
-		path.closePath();
-		g2.setStroke(new BasicStroke(1));
-		g2.setColor(color);
-		g2.draw(path);
-	}
-	
-	public void drawImageArrayTest(Graphics2D g2, ArrayList<Point2D.Double> image_array, Color color){
-		Path2D.Double path = new Path2D.Double();
-		
-		path.moveTo(image_array.get(0).getX(), image_array.get(0).getY());
-		for(int i = 1; i < image_array.size()-1; i++) {
-			
-			double current_x = image_array.get(i).getX();
-			double current_y = image_array.get(i).getY();
-			double next_x = image_array.get(i+1).getX();
-			double next_y = image_array.get(i+1).getY();
-		
-			path.quadTo(current_x, current_y, next_x, next_y);
-		}
-		path.closePath();
-		
-		g2.setColor(color);
-		g2.setStroke(new BasicStroke(1));
-		g2.draw(path);
-		
-		// Reset the stroke to default
-		g2.setStroke(new BasicStroke(1));
-		
-		
-		/*for(int i = 0; i < image_array.size()-1; i++) {
-			
-			double current_x = image_array.get(i).getX();
-			double current_y = image_array.get(i).getY();
-			double next_x = image_array.get(i+1).getX();
-			double next_y = image_array.get(i+1).getY();
-			
-			g2.setStroke(new BasicStroke(1));
-			g2.setColor(color);
-			g2.draw(new Line2D.Double(current_x, current_y, next_x, next_y));
-			
-			// Reset the stroke to default
-			g2.setStroke(new BasicStroke(1));
-		}*/
 	}
 	
 	public void showSelectionButtons(boolean show_buttons){
