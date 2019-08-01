@@ -18,6 +18,8 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.geom.Line2D;
+import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.io.File;
 import java.text.DecimalFormat;
@@ -56,6 +58,7 @@ public class appWindow extends JFrame{
 	public static int x = 0, y = 0;
 	public static ArrayList<Point> drawn_image_array = new ArrayList<Point>();
 	ArrayList<Point> fourier_series_drawn_image_array = new ArrayList<Point>();
+	public static ArrayList<Point2D.Double> test = new ArrayList<Point2D.Double>();
 	ArrayList<arrowAndCircleRenderData> arrow_circle_render_data_array = new ArrayList<arrowAndCircleRenderData>();
 	public static int initial_drawn_image_array_size;
 	
@@ -137,6 +140,10 @@ public class appWindow extends JFrame{
 						if(fourier_series_drawn_image_array.size() > 1){
 							drawImageArray(g2, fourier_series_drawn_image_array, Color.red);
 						}
+						
+						drawImageArrayTest(g2, test, Color.red);
+						g2.drawOval(mathematics.originPixelX + 100, mathematics.originPixelY-50, 100, 100);
+						
 						
 						drawOriginMarker(g2);
 						break;
@@ -608,6 +615,45 @@ public class appWindow extends JFrame{
 			// Reset the stroke to default
 			g2.setStroke(new BasicStroke(1));
 		}
+	}
+	
+	public void drawImageArrayTest(Graphics2D g2, ArrayList<Point2D.Double> image_array, Color color){
+		Path2D.Double path = new Path2D.Double();
+		
+		path.moveTo(image_array.get(0).getX(), image_array.get(0).getY());
+		for(int i = 1; i < image_array.size()-1; i++) {
+			
+			double current_x = image_array.get(i).getX();
+			double current_y = image_array.get(i).getY();
+			double next_x = image_array.get(i+1).getX();
+			double next_y = image_array.get(i+1).getY();
+		
+			path.quadTo(current_x, current_y, next_x, next_y);
+		}
+		path.closePath();
+		
+		g2.setColor(color);
+		g2.setStroke(new BasicStroke(1));
+		g2.draw(path);
+		
+		// Reset the stroke to default
+		g2.setStroke(new BasicStroke(1));
+		
+		
+		/*for(int i = 0; i < image_array.size()-1; i++) {
+			
+			double current_x = image_array.get(i).getX();
+			double current_y = image_array.get(i).getY();
+			double next_x = image_array.get(i+1).getX();
+			double next_y = image_array.get(i+1).getY();
+			
+			g2.setStroke(new BasicStroke(1));
+			g2.setColor(color);
+			g2.draw(new Line2D.Double(current_x, current_y, next_x, next_y));
+			
+			// Reset the stroke to default
+			g2.setStroke(new BasicStroke(1));
+		}*/
 	}
 	
 	public void showSelectionButtons(boolean show_buttons){

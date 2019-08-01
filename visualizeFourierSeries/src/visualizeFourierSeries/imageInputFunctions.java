@@ -4,6 +4,8 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.geom.Point2D;
+import java.awt.geom.Point2D.Double;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -251,6 +253,17 @@ public class imageInputFunctions {
 			e.printStackTrace();
 		}
 		
+	}
+	
+	public static void loadTestCircle(int number_of_samples) {
+		//ArrayList<Point2D.Double> result_array = new ArrayList<Point2D.Double>();
+		ArrayList<Point2D.Double> result_array = new ArrayList<Point2D.Double>();
+		double step_size = 2*Math.PI/number_of_samples;
+		double magnitude = 50;
+		for(int i = 0; i < number_of_samples; i++) {
+			result_array.add(new Point2D.Double( mathematics.originPixelX + (magnitude*Math.cos(i*step_size)), mathematics.originPixelY + (magnitude*Math.sin(i*step_size))));
+		}
+		Main.app_window.test = result_array;
 	}
 	
 
