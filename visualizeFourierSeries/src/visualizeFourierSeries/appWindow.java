@@ -18,14 +18,13 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.geom.Line2D;
+import java.awt.geom.GeneralPath;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Hashtable;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -141,7 +140,8 @@ public class appWindow extends JFrame{
 							drawImageArray(g2, fourier_series_drawn_image_array, Color.red);
 						}
 						
-						drawImageArrayTest(g2, test, Color.red);
+					//	drawImageArrayTest(g2, test, Color.red);
+						drawImageArray2(g2, test, Color.red);
 						g2.drawOval(mathematics.originPixelX + 100, mathematics.originPixelY-50, 100, 100);
 						
 						
@@ -212,7 +212,7 @@ public class appWindow extends JFrame{
 
 			public void mouseReleased(MouseEvent arg0) {
 				
-				if(current_app_status == DRAWING_IMAGE){
+				if(current_app_status == DRAWING_IMAGE && drawn_image_array.size() != 0){
 					current_app_status = RENDERING_FOURIER_ANIMATION;
 					calculateAndstartFourierAnimation();
 				}
@@ -615,6 +615,27 @@ public class appWindow extends JFrame{
 			// Reset the stroke to default
 			g2.setStroke(new BasicStroke(1));
 		}
+	}
+	
+	public void drawImageArray2(Graphics2D g2, ArrayList<Point2D.Double> image_array, Color color){
+		int loop_length = image_array.size()/9;
+		GeneralPath path = new GeneralPath();
+		path.moveTo(image_array.get(0).getX(), image_array.get(0).getY());
+		
+		for(int i = 0; i < loop_length; i++){
+			double x1 = image_array.get(3*i+1).getX();
+			double y1 = image_array.get(3*i+1).getY();
+			double x2 = image_array.get(6*i+2).getX();
+			double y2 = image_array.get(6*i+2).getY();
+			double x3 = image_array.get(9*i+3).getX();
+			double y3 = image_array.get(9*i+3).getY();
+			
+			path.curveTo(x1, y1, x2, y2, x3, y3);
+		}
+		path.closePath();
+		g2.setStroke(new BasicStroke(1));
+		g2.setColor(color);
+		g2.draw(path);
 	}
 	
 	public void drawImageArrayTest(Graphics2D g2, ArrayList<Point2D.Double> image_array, Color color){
