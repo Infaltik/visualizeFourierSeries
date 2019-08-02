@@ -245,7 +245,15 @@ public class appWindow extends JFrame{
 				nbrOfFourierTermsSpinnerEventHandler(e);
 			}
 		});
-		nbr_of_fourier_terms_spinner_panel.add(nbr_of_fourier_terms_spinner);
+		JButton restart_button = new JButton("Restart");
+		restart_button.setFocusable(false);
+		restart_button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				restartButtonPressed();
+			}
+		});
+		nbr_of_fourier_terms_spinner_panel.add(restart_button, BorderLayout.SOUTH);
+		nbr_of_fourier_terms_spinner_panel.add(nbr_of_fourier_terms_spinner, BorderLayout.CENTER);
 		
 		settings_panel.add(show_arrow_circles_check_box);
 		settings_panel.add(show_arrows_check_box);
@@ -595,12 +603,19 @@ public class appWindow extends JFrame{
 	
 	private void nbrOfFourierTermsSpinnerEventHandler(ChangeEvent e){
 		int pending_value = (int) nbr_of_fourier_terms_spinner.getValue();
-		if(pending_value%2 != 0 ){
-			mathematics.nbr_of_fourier_terms = pending_value;
-		}
-		else{
+		if(pending_value%2 == 0 ){
 			nbr_of_fourier_terms_spinner.setValue(pending_value + 1);
-			mathematics.nbr_of_fourier_terms = pending_value + 1;
+		}
+	}
+	
+	private void restartButtonPressed(){
+		mathematics.nbr_of_fourier_terms = (int) nbr_of_fourier_terms_spinner.getValue();
+		
+		if(drawn_image_array.size() != 0){
+			fourier_series_drawn_image_array.clear();
+			mathematics.calculateFourierSeriesCoefficients();
+			mathematics.independent_variable = 0;
+			Main.app_window.arrow_calculations_done = false;
 		}
 	}
 	
