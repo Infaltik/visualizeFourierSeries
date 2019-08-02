@@ -18,8 +18,6 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.io.File;
 import java.text.DecimalFormat;
@@ -33,6 +31,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -69,6 +69,8 @@ public class appWindow extends JFrame{
 	JSlider animation_speed_slider;
 	JSlider FPS_slider;
 	
+	JSpinner nbr_of_fourier_terms_spinner;
+	
 	// Standard format to output decimals
 	DecimalFormat numberFormat = new DecimalFormat("0.0000");
 	
@@ -101,63 +103,7 @@ public class appWindow extends JFrame{
 				
 				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 				
-				switch(current_app_status){
-					case SELECTION_SCREEN:
-						this.setBackground(Color.black);
-						break;
-					
-					case DRAWING_IMAGE:
-						this.setBackground(Color.white);
-						
-						g2.drawString("Mouse position: " + x + ", " + y, 40, 40);
-						
-						complexNumber complex_value = mathematics.pixelToComplexNumber(new Point(x, y));
-						if(complex_value.getImagPart() < 0) {
-							g2.drawString("Complex value: " + numberFormat.format(complex_value.getRealPart()) + "-" + numberFormat.format(Math.abs(complex_value.getImagPart())) + "i", 40, 80);
-						}
-						else {
-							g2.drawString("Complex value: " + numberFormat.format(complex_value.getRealPart()) + "+" + numberFormat.format(Math.abs(complex_value.getImagPart())) + "i", 40, 80);
-						}
-						
-						drawImageArray(g2, drawn_image_array, Color.black);
-						drawOriginMarker(g2);
-						break;
-						
-					case RENDERING_FOURIER_ANIMATION:
-						this.setBackground(Color.black);
-						
-						if(show_target_function_in_animation) {
-							Color color1 = new Color(0, (float) 1, 0, (float) 0.4);
-							drawImageArray(g2, drawn_image_array, color1);
-						}
-						
-						g2.setColor(Color.white);
-						for(int i = 0; i < arrow_circle_render_data_array.size(); i++){
-							drawArrow(g2, arrow_circle_render_data_array.get(i), show_arrow_circles_in_animation);
-						}
-						arrow_calculations_done = false;
-						
-						
-												
-						if(fourier_series_drawn_image_array.size() > 1){
-							drawImageArray(g2, fourier_series_drawn_image_array, Color.red);
-						}
-						
-						drawOriginMarker(g2);
-						break;
-					case TRACING_INPUT_IMAGE:
-						imageInputFunctions.drawImageTracingPreview(g2);
-						imageInputFunctions.drawTracingMarker(g2);
-						break;
-					case SELECTING_TRACING_INPUT_IMAGE_START:
-						imageInputFunctions.drawImageTracingPreview(g2);
-						break;
-					default:
-						this.setBackground(Color.BLACK);
-						break;
-				}
-				
-				
+				renderCurrentAppStatus(g2);
 			}
 		};
 		rendering_panel.setPreferredSize(new Dimension(rendering_panel_width, rendering_panel_height)); // 900 750
@@ -289,16 +235,84 @@ public class appWindow extends JFrame{
 		FPS_slider.setPaintTicks(true);
 		FPS_slider.setPaintLabels(true);
 		
+		JPanel nbr_of_fourier_terms_spinner_panel = new JPanel(new BorderLayout());
+		nbr_of_fourier_terms_spinner_panel.add(new JLabel("Number of arrows"), BorderLayout.NORTH);
+		SpinnerNumberModel nbr_of_fourier_terms_spinner_model = new SpinnerNumberModel(mathematics.nbr_of_fourier_terms,
+				1, 1001, 2);
+		nbr_of_fourier_terms_spinner = new JSpinner(nbr_of_fourier_terms_spinner_model);
+		nbr_of_fourier_terms_spinner.addChangeListener(new ChangeListener(){
+			public void stateChanged(ChangeEvent e) {
+				nbrOfFourierTermsSpinnerEventHandler(e);
+			}
+		});
+		nbr_of_fourier_terms_spinner_panel.add(nbr_of_fourier_terms_spinner);
 		
 		settings_panel.add(show_arrow_circles_check_box);
 		settings_panel.add(show_arrows_check_box);
 		settings_panel.add(show_target_image_check_box);
 		settings_panel.add(animation_speed_slider_panel);
 		settings_panel.add(FPS_slider_panel);
+		settings_panel.add(nbr_of_fourier_terms_spinner_panel);
 		
 		this.add(settings_panel, BorderLayout.EAST);
 		
 		this.setVisible(true);
+	}
+	
+	private void renderCurrentAppStatus(Graphics2D g2){
+		switch(current_app_status){
+			case SELECTION_SCREEN:
+				rendering_panel.setBackground(Color.black);
+				break;
+			
+			case DRAWING_IMAGE:
+				rendering_panel.setBackground(Color.white);
+				
+				g2.drawString("Mouse position: " + x + ", " + y, 40, 40);
+				
+				complexNumber complex_value = mathematics.pixelToComplexNumber(new Point(x, y));
+				if(complex_value.getImagPart() < 0) {
+					g2.drawString("Complex value: " + numberFormat.format(complex_value.getRealPart()) + "-" + numberFormat.format(Math.abs(complex_value.getImagPart())) + "i", 40, 80);
+				}
+				else {
+					g2.drawString("Complex value: " + numberFormat.format(complex_value.getRealPart()) + "+" + numberFormat.format(Math.abs(complex_value.getImagPart())) + "i", 40, 80);
+				}
+				
+				drawImageArray(g2, drawn_image_array, Color.black);
+				drawOriginMarker(g2);
+				break;
+				
+			case RENDERING_FOURIER_ANIMATION:
+				rendering_panel.setBackground(Color.black);
+				
+				if(show_target_function_in_animation) {
+					Color color1 = new Color(0, (float) 1, 0, (float) 0.4);
+					drawImageArray(g2, drawn_image_array, color1);
+				}
+				
+				g2.setColor(Color.white);
+				for(int i = 0; i < arrow_circle_render_data_array.size(); i++){
+					drawArrow(g2, arrow_circle_render_data_array.get(i), show_arrow_circles_in_animation);
+				}
+				arrow_calculations_done = false;
+				
+				if(fourier_series_drawn_image_array.size() > 1){
+					drawImageArray(g2, fourier_series_drawn_image_array, Color.red);
+				}
+				
+				drawOriginMarker(g2);
+				break;
+			case TRACING_INPUT_IMAGE:
+				imageInputFunctions.drawImageTracingPreview(g2);
+				imageInputFunctions.drawTracingMarker(g2);
+				break;
+			case SELECTING_TRACING_INPUT_IMAGE_START:
+				imageInputFunctions.drawImageTracingPreview(g2);
+				break;
+			default:
+				rendering_panel.setBackground(Color.BLACK);
+				break;
+		}
 	}
 	
 	public void arrowPreRenderCalculations(){
@@ -312,8 +326,6 @@ public class appWindow extends JFrame{
 	}
 	
 	public arrowAndCircleRenderData calculateArrow(complexNumber complex_value, int shift_index){
-		
-		
 		int vector_sum_index = mathematics.shiftIndexToVectorSumIndex(shift_index);
 		Point2D.Double end_point = mathematics.calculateEndPointDouble(vector_sum_index);
 		Point2D.Double previous_end_point = mathematics.calculateEndPointDouble(vector_sum_index-1);
@@ -417,7 +429,7 @@ public class appWindow extends JFrame{
 		}
 	}
 	
-	public void showSelectionButtons(boolean show_buttons){
+	private void showSelectionButtons(boolean show_buttons){
 		if(show_buttons){
 			rendering_panel.add(draw_image_button);
 			rendering_panel.add(trace_input_image_button);
@@ -430,7 +442,7 @@ public class appWindow extends JFrame{
 		}
 	}
 	
-	public void drawOriginMarker(Graphics2D g2) {
+	private void drawOriginMarker(Graphics2D g2) {
 		Color color = new Color(0, 0, 0, (float) 0.5);
 		g2.setColor(color);
 		g2.setStroke(new BasicStroke(1));
@@ -455,7 +467,7 @@ public class appWindow extends JFrame{
 		rendering_panel.repaint();
 	}
 	
-	public void mouseDraggedHandler(MouseEvent e){
+	private void mouseDraggedHandler(MouseEvent e){
 		x = e.getX();
 		y = e.getY();
 		
@@ -465,7 +477,7 @@ public class appWindow extends JFrame{
 		}
 	}
 	
-	public void mouseMovedHandler(MouseEvent e){
+	private void mouseMovedHandler(MouseEvent e){
 		x = e.getX();
 		y = e.getY();
 		
@@ -474,7 +486,7 @@ public class appWindow extends JFrame{
 		}
 	}
 	
-	public void mouseClickedHandler(MouseEvent e){
+	private void mouseClickedHandler(MouseEvent e){
 		if(current_app_status == SELECTING_TRACING_INPUT_IMAGE_START) {
 			
 			// Find the actual pixel value for the zoomed in selected pixel
@@ -488,21 +500,21 @@ public class appWindow extends JFrame{
 		}
 	}
 	
-	public void mouseReleasedHandler(MouseEvent e){
+	private void mouseReleasedHandler(MouseEvent e){
 		if(current_app_status == DRAWING_IMAGE && drawn_image_array.size() != 0){
 			current_app_status = RENDERING_FOURIER_ANIMATION;
 			calculateAndstartFourierAnimation();
 		}
 	}
 	
-	public void drawImageButtonPressed(){
+	private void drawImageButtonPressed(){
 		System.out.println("Draw image button pressed");
 		showSelectionButtons(false);
 		current_app_status = DRAWING_IMAGE;
 		render();
 	}
 	
-	public void traceInputImageButtonPressed(){
+	private void traceInputImageButtonPressed(){
 		JFileChooser fc = new JFileChooser();
 		int returned_value = fc.showOpenDialog(null);
 		
@@ -524,7 +536,7 @@ public class appWindow extends JFrame{
 		System.out.println("Trace input image button pressed");
 	}
 	
-	public void showDemoButtonPressed(){
+	private void showDemoButtonPressed(){
 		System.out.println("Elephant image demo button pressed");
 		showSelectionButtons(false);
 		imageInputFunctions.loadElephantImage();
@@ -534,7 +546,7 @@ public class appWindow extends JFrame{
 		render();
 	}
 	
-	public void showArrowCirclesCheckBoxEventHandler(ItemEvent e){
+	private void showArrowCirclesCheckBoxEventHandler(ItemEvent e){
 		if(e.getStateChange() == 1){
 			show_arrow_circles_in_animation = true;
 			render();
@@ -545,7 +557,7 @@ public class appWindow extends JFrame{
 		}
 	}
 	
-	public void showArrowsCheckBoxEventHandler(ItemEvent e){
+	private void showArrowsCheckBoxEventHandler(ItemEvent e){
 		if(e.getStateChange() == 1){
 			show_arrows_in_animation = true;
 			render();
@@ -556,7 +568,7 @@ public class appWindow extends JFrame{
 		}
 	}
 	
-	public void showTargetImageCheckBoxEventHandler(ItemEvent e){
+	private void showTargetImageCheckBoxEventHandler(ItemEvent e){
 		if(e.getStateChange() == 1){
 			show_target_function_in_animation = true;
 			render();
@@ -567,11 +579,11 @@ public class appWindow extends JFrame{
 		}
 	}
 	
-	public void animationSpeedSliderEventHandler(ChangeEvent e){
+	private void animationSpeedSliderEventHandler(ChangeEvent e){
 		animation_drawing_speed = animation_speed_slider.getValue()/100.0;
 	}
 	
-	public void fpsSliderEventHandler(ChangeEvent e){
+	private void fpsSliderEventHandler(ChangeEvent e){
 		renderLoop.TARGET_FPS = FPS_slider.getValue();
 		if(renderLoop.TARGET_FPS != 0) {
 			renderLoop.RENDER_WAIT_TIME = 1000000000/renderLoop.TARGET_FPS;
@@ -581,7 +593,18 @@ public class appWindow extends JFrame{
 		}
 	}
 	
-	public void keyPressedHandler(KeyEvent e){
+	private void nbrOfFourierTermsSpinnerEventHandler(ChangeEvent e){
+		int pending_value = (int) nbr_of_fourier_terms_spinner.getValue();
+		if(pending_value%2 != 0 ){
+			mathematics.nbr_of_fourier_terms = pending_value;
+		}
+		else{
+			nbr_of_fourier_terms_spinner.setValue(pending_value + 1);
+			mathematics.nbr_of_fourier_terms = pending_value + 1;
+		}
+	}
+	
+	private void keyPressedHandler(KeyEvent e){
 		switch(current_app_status){
 			case TRACING_INPUT_IMAGE:
 				Point previous_point = imageInputFunctions.traced_image_array.get(imageInputFunctions.traced_image_array.size()-1);
