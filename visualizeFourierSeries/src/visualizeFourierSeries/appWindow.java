@@ -65,6 +65,10 @@ public class appWindow extends JFrame{
 	JButton trace_input_image_button;
 	JButton elephant_image_demo_button;
 	
+	// Settings sliders
+	JSlider animation_speed_slider;
+	JSlider FPS_slider;
+	
 	// Standard format to output decimals
 	DecimalFormat numberFormat = new DecimalFormat("0.0000");
 	
@@ -160,56 +164,26 @@ public class appWindow extends JFrame{
 		
 		
 		rendering_panel.addMouseMotionListener(new MouseMotionListener() {
-
 			public void mouseDragged(MouseEvent e) {
-				
-				x = e.getX();
-				y = e.getY();
-				
-				if(current_app_status == DRAWING_IMAGE){
-					drawn_image_array.add(new Point(x, y));
-					rendering_panel.repaint();
-				}
-				
+				mouseDraggedHandler(e);
 			}
 
 			public void mouseMoved(MouseEvent e) {
-				
-				x = e.getX();
-				y = e.getY();
-				
-				if(current_app_status == DRAWING_IMAGE || current_app_status == TRACING_INPUT_IMAGE){
-					rendering_panel.repaint();
-				}
-				
+				mouseMovedHandler(e);
 			}
 		});
 		
 		rendering_panel.addMouseListener(new MouseListener(){
 
 			public void mouseClicked(MouseEvent e) {
-				if(current_app_status == SELECTING_TRACING_INPUT_IMAGE_START) {
-					
-					// Find the actual pixel value for the zoomed in selected pixel
-					int x_residual = e.getX()%imageInputFunctions.zoomInFactor;
-					int y_residual = e.getY()%imageInputFunctions.zoomInFactor;
-					
-					imageInputFunctions.traced_image_array.add(new Point((e.getX()-x_residual)/imageInputFunctions.zoomInFactor + imageInputFunctions.zoom_x_pos
-							, (e.getY()-y_residual)/imageInputFunctions.zoomInFactor + imageInputFunctions.zoom_y_pos));
-					current_app_status = TRACING_INPUT_IMAGE;
-					render();
-				}
+				mouseClickedHandler(e);
 			}
 			public void mouseEntered(MouseEvent arg0) {}
 			public void mouseExited(MouseEvent arg0) {}
 			public void mousePressed(MouseEvent arg0) {}
 
-			public void mouseReleased(MouseEvent arg0) {
-				
-				if(current_app_status == DRAWING_IMAGE && drawn_image_array.size() != 0){
-					current_app_status = RENDERING_FOURIER_ANIMATION;
-					calculateAndstartFourierAnimation();
-				}
+			public void mouseReleased(MouseEvent e) {
+				mouseReleasedHandler(e);
 			}
 			
 		});
@@ -219,121 +193,7 @@ public class appWindow extends JFrame{
 			public void keyTyped(KeyEvent e) {}
 
 			public void keyPressed(KeyEvent e) {
-				switch(current_app_status){
-					case TRACING_INPUT_IMAGE:
-						Point previous_point = imageInputFunctions.traced_image_array.get(imageInputFunctions.traced_image_array.size()-1);
-						Point current_point = null;
-						
-						switch(e.getKeyCode()) {
-						case 81: // Q key
-							current_point = new Point(previous_point.x-1, previous_point.y-1);
-							imageInputFunctions.traced_image_array.add(current_point);
-							render();
-							break;
-						case 87: // W key
-							current_point = new Point(previous_point.x, previous_point.y-1);
-							imageInputFunctions.traced_image_array.add(current_point);
-							render();
-							break;
-						case 69: // E key
-							current_point = new Point(previous_point.x+1, previous_point.y-1);
-							imageInputFunctions.traced_image_array.add(current_point);
-							render();
-							break;
-						case 68: // D key
-							current_point = new Point(previous_point.x+1, previous_point.y);
-							imageInputFunctions.traced_image_array.add(current_point);
-							render();
-							break;
-						case 67: // C key
-							current_point = new Point(previous_point.x+1, previous_point.y+1);
-							imageInputFunctions.traced_image_array.add(current_point);
-							render();
-							break;
-						case 88: // X key
-							current_point = new Point(previous_point.x, previous_point.y+1);
-							imageInputFunctions.traced_image_array.add(current_point);
-							render();
-							break;
-						case 90: // Z key
-							current_point = new Point(previous_point.x-1, previous_point.y+1);
-							imageInputFunctions.traced_image_array.add(current_point);
-							render();
-							break;
-						case 65: // A key
-							current_point = new Point(previous_point.x-1, previous_point.y);
-							imageInputFunctions.traced_image_array.add(current_point);
-							render();
-							break;
-						case 10: // Enter
-							imageInputFunctions.printTracedArrayInSavableFormat();
-							break;
-						case 109: // right "-"-key
-							imageInputFunctions.zoomOut();
-							render();
-							break;
-						case 107: // right "+"-key
-							imageInputFunctions.zoomIn();
-							render();
-							break;
-						case 37: // left arrow
-							imageInputFunctions.zoom_x_pos = Math.max(0, imageInputFunctions.zoom_x_pos-1);
-							render();
-							break;
-						case 38: // up arrow
-							imageInputFunctions.zoom_y_pos = Math.max(0, imageInputFunctions.zoom_y_pos-1);
-							render();
-							break;
-						case 39: // right arrow
-							int max_x_pos = imageInputFunctions.output_image.getWidth()-imageInputFunctions.preview_rectangle_width;
-							imageInputFunctions.zoom_x_pos = Math.min(max_x_pos, imageInputFunctions.zoom_x_pos+1);
-							render();
-							break;
-						case 40: // down arrow
-							int max_y_pos = imageInputFunctions.output_image.getHeight()-imageInputFunctions.preview_rectangle_height;
-							imageInputFunctions.zoom_y_pos = Math.min(max_y_pos, imageInputFunctions.zoom_y_pos+1);
-							render();
-							break;
-						case 27: // esc
-							if(imageInputFunctions.traced_image_array.size() > 1) {
-								imageInputFunctions.traced_image_array.remove(imageInputFunctions.traced_image_array.size()-1);
-							}
-							render();
-							break;
-						}
-						break;
-					case SELECTING_TRACING_INPUT_IMAGE_START:
-					switch(e.getKeyCode()) {
-						case 109: // right "-"-key
-							imageInputFunctions.zoomOut();
-							render();
-							break;
-						case 107: // right "+"-key
-							imageInputFunctions.zoomIn();
-							render();
-							break;
-						case 37: // left arrow
-							imageInputFunctions.zoom_x_pos = Math.max(0, imageInputFunctions.zoom_x_pos-1);
-							render();
-							break;
-						case 38: // up arrow
-							imageInputFunctions.zoom_y_pos = Math.max(0, imageInputFunctions.zoom_y_pos-1);
-							render();
-							break;
-						case 39: // right arrow
-							int max_x_pos = imageInputFunctions.output_image.getWidth()-imageInputFunctions.preview_rectangle_width;
-							imageInputFunctions.zoom_x_pos = Math.min(max_x_pos, imageInputFunctions.zoom_x_pos+1);
-							render();
-							break;
-						case 40: // down arrow
-							int max_y_pos = imageInputFunctions.output_image.getHeight()-imageInputFunctions.preview_rectangle_height;
-							imageInputFunctions.zoom_y_pos = Math.min(max_y_pos, imageInputFunctions.zoom_y_pos+1);
-							render();
-							break;
-					}
-						break;
-				}
-				
+				keyPressedHandler(e);
 			}
 			public void keyReleased(KeyEvent e) {}
 			
@@ -343,10 +203,7 @@ public class appWindow extends JFrame{
 		draw_image_button.setFocusable(false);
 		draw_image_button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Draw image button pressed");
-				showSelectionButtons(false);
-				current_app_status = DRAWING_IMAGE;
-				render();
+				drawImageButtonPressed();
 			}
 		});
 		
@@ -354,25 +211,7 @@ public class appWindow extends JFrame{
 		trace_input_image_button.setFocusable(false);
 		trace_input_image_button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				JFileChooser fc = new JFileChooser();
-				int returned_value = fc.showOpenDialog(null);
-				
-				if(returned_value == JFileChooser.APPROVE_OPTION) {
-					File file = fc.getSelectedFile();
-					imageInputFunctions.readImage(file);
-					
-					showSelectionButtons(false);
-					current_app_status = SELECTING_TRACING_INPUT_IMAGE_START;
-					render();
-				}
-				else if(returned_value == JFileChooser.CANCEL_OPTION) {
-					System.out.println("File selection canceled");
-				}
-				else if(returned_value == JFileChooser.ERROR_OPTION) {
-					System.err.println("An error occured while selecting a file");
-				}
-				
-				System.out.println("Trace input image button pressed");
+				traceInputImageButtonPressed();
 			}
 		});
 		
@@ -380,13 +219,7 @@ public class appWindow extends JFrame{
 		elephant_image_demo_button.setFocusable(false);
 		elephant_image_demo_button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Elephant image demo button pressed");
-				showSelectionButtons(false);
-				imageInputFunctions.loadElephantImage();
-				calculateAndstartFourierAnimation();
-				
-				current_app_status = RENDERING_FOURIER_ANIMATION;
-				render();
+				showDemoButtonPressed();
 			}
 		});
 		
@@ -405,14 +238,7 @@ public class appWindow extends JFrame{
 		JCheckBox show_arrow_circles_check_box = new JCheckBox("Show circles", show_arrow_circles_in_animation);
 		show_arrow_circles_check_box.addItemListener(new ItemListener(){
 			public void itemStateChanged(ItemEvent e) {
-				if(e.getStateChange() == 1){
-					show_arrow_circles_in_animation = true;
-					render();
-				}
-				else{
-					show_arrow_circles_in_animation = false;
-					render();
-				}
+				showArrowCirclesCheckBoxEventHandler(e);
 			}
 		});
 		show_arrow_circles_check_box.setFocusable(false);
@@ -420,14 +246,7 @@ public class appWindow extends JFrame{
 		JCheckBox show_arrows_check_box = new JCheckBox("Show arrows", true);
 		show_arrows_check_box.addItemListener(new ItemListener(){
 			public void itemStateChanged(ItemEvent e) {
-				if(e.getStateChange() == 1){
-					show_arrows_in_animation = true;
-					render();
-				}
-				else{
-					show_arrows_in_animation = false;
-					render();
-				}
+				showArrowsCheckBoxEventHandler(e);
 			}
 		});
 		show_arrows_check_box.setFocusable(false);
@@ -435,24 +254,17 @@ public class appWindow extends JFrame{
 		JCheckBox show_target_image_check_box = new JCheckBox("Show target image", show_target_function_in_animation);
 		show_target_image_check_box.addItemListener(new ItemListener(){
 			public void itemStateChanged(ItemEvent e) {
-				if(e.getStateChange() == 1){
-					show_target_function_in_animation = true;
-					render();
-				}
-				else{
-					show_target_function_in_animation = false;
-					render();
-				}
+				showTargetImageCheckBoxEventHandler(e);
 			}
 		});
 		show_target_image_check_box.setFocusable(false);
 		
 		JPanel animation_speed_slider_panel = new JPanel(new BorderLayout());
 		animation_speed_slider_panel.add(new JLabel("Function evaluation resolution (Sort of the animation speed)"), BorderLayout.NORTH);
-		JSlider animation_speed_slider = new JSlider(JSlider.HORIZONTAL, 0, 400, (int) (animation_drawing_speed*100) );
+		animation_speed_slider = new JSlider(JSlider.HORIZONTAL, 0, 400, (int) (animation_drawing_speed*100) );
 		animation_speed_slider.addChangeListener(new ChangeListener(){
 			public void stateChanged(ChangeEvent e) {
-				animation_drawing_speed = animation_speed_slider.getValue()/100.0;
+				animationSpeedSliderEventHandler(e);
 			}
 		});
 		animation_speed_slider_panel.add(animation_speed_slider);
@@ -464,16 +276,10 @@ public class appWindow extends JFrame{
 		
 		JPanel FPS_slider_panel = new JPanel(new BorderLayout());
 		FPS_slider_panel.add(new JLabel("Frames per second"), BorderLayout.NORTH);
-		JSlider FPS_slider = new JSlider(JSlider.HORIZONTAL, 0, 200, renderLoop.TARGET_FPS);
+		FPS_slider = new JSlider(JSlider.HORIZONTAL, 0, 200, renderLoop.TARGET_FPS);
 		FPS_slider.addChangeListener(new ChangeListener(){
 			public void stateChanged(ChangeEvent e) {
-				renderLoop.TARGET_FPS = FPS_slider.getValue();
-				if(renderLoop.TARGET_FPS != 0) {
-					renderLoop.RENDER_WAIT_TIME = 1000000000/renderLoop.TARGET_FPS;
-				}
-				else {
-					renderLoop.RENDER_WAIT_TIME = Long.MAX_VALUE;
-				}
+				fpsSliderEventHandler(e);
 			}
 		});
 		FPS_slider_panel.add(FPS_slider);
@@ -647,6 +453,249 @@ public class appWindow extends JFrame{
 	
 	public void render(){
 		rendering_panel.repaint();
+	}
+	
+	public void mouseDraggedHandler(MouseEvent e){
+		x = e.getX();
+		y = e.getY();
+		
+		if(current_app_status == DRAWING_IMAGE){
+			drawn_image_array.add(new Point(x, y));
+			rendering_panel.repaint();
+		}
+	}
+	
+	public void mouseMovedHandler(MouseEvent e){
+		x = e.getX();
+		y = e.getY();
+		
+		if(current_app_status == DRAWING_IMAGE || current_app_status == TRACING_INPUT_IMAGE){
+			rendering_panel.repaint();
+		}
+	}
+	
+	public void mouseClickedHandler(MouseEvent e){
+		if(current_app_status == SELECTING_TRACING_INPUT_IMAGE_START) {
+			
+			// Find the actual pixel value for the zoomed in selected pixel
+			int x_residual = e.getX()%imageInputFunctions.zoomInFactor;
+			int y_residual = e.getY()%imageInputFunctions.zoomInFactor;
+			
+			imageInputFunctions.traced_image_array.add(new Point((e.getX()-x_residual)/imageInputFunctions.zoomInFactor + imageInputFunctions.zoom_x_pos
+					, (e.getY()-y_residual)/imageInputFunctions.zoomInFactor + imageInputFunctions.zoom_y_pos));
+			current_app_status = TRACING_INPUT_IMAGE;
+			render();
+		}
+	}
+	
+	public void mouseReleasedHandler(MouseEvent e){
+		if(current_app_status == DRAWING_IMAGE && drawn_image_array.size() != 0){
+			current_app_status = RENDERING_FOURIER_ANIMATION;
+			calculateAndstartFourierAnimation();
+		}
+	}
+	
+	public void drawImageButtonPressed(){
+		System.out.println("Draw image button pressed");
+		showSelectionButtons(false);
+		current_app_status = DRAWING_IMAGE;
+		render();
+	}
+	
+	public void traceInputImageButtonPressed(){
+		JFileChooser fc = new JFileChooser();
+		int returned_value = fc.showOpenDialog(null);
+		
+		if(returned_value == JFileChooser.APPROVE_OPTION) {
+			File file = fc.getSelectedFile();
+			imageInputFunctions.readImage(file);
+			
+			showSelectionButtons(false);
+			current_app_status = SELECTING_TRACING_INPUT_IMAGE_START;
+			render();
+		}
+		else if(returned_value == JFileChooser.CANCEL_OPTION) {
+			System.out.println("File selection canceled");
+		}
+		else if(returned_value == JFileChooser.ERROR_OPTION) {
+			System.err.println("An error occured while selecting a file");
+		}
+		
+		System.out.println("Trace input image button pressed");
+	}
+	
+	public void showDemoButtonPressed(){
+		System.out.println("Elephant image demo button pressed");
+		showSelectionButtons(false);
+		imageInputFunctions.loadElephantImage();
+		calculateAndstartFourierAnimation();
+		
+		current_app_status = RENDERING_FOURIER_ANIMATION;
+		render();
+	}
+	
+	public void showArrowCirclesCheckBoxEventHandler(ItemEvent e){
+		if(e.getStateChange() == 1){
+			show_arrow_circles_in_animation = true;
+			render();
+		}
+		else{
+			show_arrow_circles_in_animation = false;
+			render();
+		}
+	}
+	
+	public void showArrowsCheckBoxEventHandler(ItemEvent e){
+		if(e.getStateChange() == 1){
+			show_arrows_in_animation = true;
+			render();
+		}
+		else{
+			show_arrows_in_animation = false;
+			render();
+		}
+	}
+	
+	public void showTargetImageCheckBoxEventHandler(ItemEvent e){
+		if(e.getStateChange() == 1){
+			show_target_function_in_animation = true;
+			render();
+		}
+		else{
+			show_target_function_in_animation = false;
+			render();
+		}
+	}
+	
+	public void animationSpeedSliderEventHandler(ChangeEvent e){
+		animation_drawing_speed = animation_speed_slider.getValue()/100.0;
+	}
+	
+	public void fpsSliderEventHandler(ChangeEvent e){
+		renderLoop.TARGET_FPS = FPS_slider.getValue();
+		if(renderLoop.TARGET_FPS != 0) {
+			renderLoop.RENDER_WAIT_TIME = 1000000000/renderLoop.TARGET_FPS;
+		}
+		else {
+			renderLoop.RENDER_WAIT_TIME = Long.MAX_VALUE;
+		}
+	}
+	
+	public void keyPressedHandler(KeyEvent e){
+		switch(current_app_status){
+			case TRACING_INPUT_IMAGE:
+				Point previous_point = imageInputFunctions.traced_image_array.get(imageInputFunctions.traced_image_array.size()-1);
+				Point current_point = null;
+				
+				switch(e.getKeyCode()) {
+				case 81: // Q key
+					current_point = new Point(previous_point.x-1, previous_point.y-1);
+					imageInputFunctions.traced_image_array.add(current_point);
+					render();
+					break;
+				case 87: // W key
+					current_point = new Point(previous_point.x, previous_point.y-1);
+					imageInputFunctions.traced_image_array.add(current_point);
+					render();
+					break;
+				case 69: // E key
+					current_point = new Point(previous_point.x+1, previous_point.y-1);
+					imageInputFunctions.traced_image_array.add(current_point);
+					render();
+					break;
+				case 68: // D key
+					current_point = new Point(previous_point.x+1, previous_point.y);
+					imageInputFunctions.traced_image_array.add(current_point);
+					render();
+					break;
+				case 67: // C key
+					current_point = new Point(previous_point.x+1, previous_point.y+1);
+					imageInputFunctions.traced_image_array.add(current_point);
+					render();
+					break;
+				case 88: // X key
+					current_point = new Point(previous_point.x, previous_point.y+1);
+					imageInputFunctions.traced_image_array.add(current_point);
+					render();
+					break;
+				case 90: // Z key
+					current_point = new Point(previous_point.x-1, previous_point.y+1);
+					imageInputFunctions.traced_image_array.add(current_point);
+					render();
+					break;
+				case 65: // A key
+					current_point = new Point(previous_point.x-1, previous_point.y);
+					imageInputFunctions.traced_image_array.add(current_point);
+					render();
+					break;
+				case 10: // Enter
+					imageInputFunctions.printTracedArrayInSavableFormat();
+					break;
+				case 109: // right "-"-key
+					imageInputFunctions.zoomOut();
+					render();
+					break;
+				case 107: // right "+"-key
+					imageInputFunctions.zoomIn();
+					render();
+					break;
+				case 37: // left arrow
+					imageInputFunctions.zoom_x_pos = Math.max(0, imageInputFunctions.zoom_x_pos-1);
+					render();
+					break;
+				case 38: // up arrow
+					imageInputFunctions.zoom_y_pos = Math.max(0, imageInputFunctions.zoom_y_pos-1);
+					render();
+					break;
+				case 39: // right arrow
+					int max_x_pos = imageInputFunctions.output_image.getWidth()-imageInputFunctions.preview_rectangle_width;
+					imageInputFunctions.zoom_x_pos = Math.min(max_x_pos, imageInputFunctions.zoom_x_pos+1);
+					render();
+					break;
+				case 40: // down arrow
+					int max_y_pos = imageInputFunctions.output_image.getHeight()-imageInputFunctions.preview_rectangle_height;
+					imageInputFunctions.zoom_y_pos = Math.min(max_y_pos, imageInputFunctions.zoom_y_pos+1);
+					render();
+					break;
+				case 27: // esc
+					if(imageInputFunctions.traced_image_array.size() > 1) {
+						imageInputFunctions.traced_image_array.remove(imageInputFunctions.traced_image_array.size()-1);
+					}
+					render();
+					break;
+				}
+			break;
+			case SELECTING_TRACING_INPUT_IMAGE_START:
+				switch(e.getKeyCode()) {
+					case 109: // right "-"-key
+						imageInputFunctions.zoomOut();
+						render();
+						break;
+					case 107: // right "+"-key
+						imageInputFunctions.zoomIn();
+						render();
+						break;
+					case 37: // left arrow
+						imageInputFunctions.zoom_x_pos = Math.max(0, imageInputFunctions.zoom_x_pos-1);
+						render();
+						break;
+					case 38: // up arrow
+						imageInputFunctions.zoom_y_pos = Math.max(0, imageInputFunctions.zoom_y_pos-1);
+						render();
+						break;
+					case 39: // right arrow
+						int max_x_pos = imageInputFunctions.output_image.getWidth()-imageInputFunctions.preview_rectangle_width;
+						imageInputFunctions.zoom_x_pos = Math.min(max_x_pos, imageInputFunctions.zoom_x_pos+1);
+						render();
+						break;
+					case 40: // down arrow
+						int max_y_pos = imageInputFunctions.output_image.getHeight()-imageInputFunctions.preview_rectangle_height;
+						imageInputFunctions.zoom_y_pos = Math.min(max_y_pos, imageInputFunctions.zoom_y_pos+1);
+						render();
+						break;
+				}
+			break;
+		}
 	}
 	
 }
