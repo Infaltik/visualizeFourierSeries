@@ -73,7 +73,8 @@ public class appWindow extends JFrame{
 	
 	JSpinner nbr_of_fourier_terms_spinner;
 	
-	public static JProgressBar calculations_progress_bar;
+	JPanel calculations_progress_bar_panel;
+	JProgressBar calculations_progress_bar;
 	
 	// Standard format to output decimals
 	DecimalFormat numberFormat = new DecimalFormat("0.0000");
@@ -89,6 +90,7 @@ public class appWindow extends JFrame{
 	// Flag used for rendering
 	boolean arrow_calculations_done = false;
 	
+	renderLoop current_render_loop;
 	Thread render_thread;
 
 	public appWindow(String window_title) {
@@ -262,10 +264,11 @@ public class appWindow extends JFrame{
 		nbr_of_fourier_terms_spinner_panel.add(nbr_of_fourier_terms_spinner, BorderLayout.CENTER);
 		
 		
-		JPanel calculations_progress_bar_panel = new JPanel(new BorderLayout());
+		calculations_progress_bar_panel = new JPanel(new BorderLayout());
 		calculations_progress_bar_panel.add(new JLabel("Calculating ..."), BorderLayout.NORTH);
 		calculations_progress_bar = new JProgressBar(0, mathematics.nbr_of_fourier_terms);
 		calculations_progress_bar_panel.add(calculations_progress_bar, BorderLayout.CENTER);
+		calculations_progress_bar_panel.setVisible(false);
 		
 		
 		settings_panel.add(show_arrow_circles_check_box);
@@ -475,13 +478,13 @@ public class appWindow extends JFrame{
 	public void calculateAndstartFourierAnimation() {
 		// Flip array so that the fourier series animation draws in the same
 		// direction as the drawer
-		Collections.reverse(drawn_image_array);
-		
-		mathematics.convertToComplexAndStoreFunction(drawn_image_array);
+		Collections.reverse(appWindow.drawn_image_array);
+						
+		mathematics.convertToComplexAndStoreFunction(appWindow.drawn_image_array);
 		mathematics.iterateAddingMoreSamplesToFunction(5); // Make this input dependant on number of fourier terms ???
-		mathematics.calculateFourierSeriesCoefficients();
-		
-		render_thread = new Thread(new renderLoop());
+				
+		current_render_loop = new renderLoop();
+		render_thread = new Thread(current_render_loop);
 		render_thread.start();
 	}
 	
@@ -626,11 +629,10 @@ public class appWindow extends JFrame{
 	}
 	
 	private void restartButtonPressed(){
-		
 		if(render_thread != null){
 			// Wait for current calculations to finish to
 			// have safe behavior between the threads
-			renderLoop.should_stop_thread = true;
+			current_render_loop.should_stop_thread = true;
 			waitForRenderThreadToStop();
 		}
 		
@@ -644,7 +646,10 @@ public class appWindow extends JFrame{
 			Main.app_window.arrow_calculations_done = false;
 		}
 		
-		renderLoop.should_stop_thread = false;
+		//current_render_loop.should_stop_thread = false;
+		current_render_loop = new renderLoop();
+		render_thread = new Thread(current_render_loop);
+		render_thread.start();
 	}
 	
 	private void keyPressedHandler(KeyEvent e){
@@ -766,13 +771,12 @@ public class appWindow extends JFrame{
 	
 	public void updateCalculationsProgressBar(int current_coefficient_index){
 		calculations_progress_bar.setValue(current_coefficient_index);
-		calculations_progress_bar.paint(calculations_progress_bar.getGraphics());
 	}
 	
 	private void waitForRenderThreadToStop(){
-		while(!renderLoop.has_stopped){
+		while(render_thread.isAlive()){
 			try {
-				Thread.sleep(10);
+				Thread.sleep(1);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

@@ -55,14 +55,20 @@ public class mathematics {
 	}
 	
 	public static void calculateFourierSeriesCoefficients(){
+		Main.app_window.calculations_progress_bar_panel.setVisible(true);
+		
 		int[] shift_indices_array = createShiftIndices();
 		fourier_series_coefficients = new complexNumber[nbr_of_fourier_terms];
 		fourier_series_terms = new complexNumber[nbr_of_fourier_terms];
 		for(int i = 0; i < shift_indices_array.length; i++){
+			// Visualize progress in the loading bar
 			Main.app_window.updateCalculationsProgressBar(i);
+			
 			complexNumber current_coefficient = calculateIntegralNumerically(shift_indices_array[i]);
 			fourier_series_coefficients[i] = current_coefficient;
 		}
+		
+		Main.app_window.calculations_progress_bar_panel.setVisible(false);
 	}
 	
 	public static complexNumber calculateIntegralNumerically(int shifting_index){

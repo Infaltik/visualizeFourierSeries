@@ -1,23 +1,25 @@
 package visualizeFourierSeries;
 
 import java.awt.Point;
+import java.util.Collections;
 
 public class renderLoop implements Runnable{
 	
 	public static int TARGET_FPS = 200;
 	public static long RENDER_WAIT_TIME = 1000000000/TARGET_FPS;
-	public static boolean should_stop_thread = false;
-	public static boolean has_stopped = false;
+	public boolean should_stop_thread = false;
 	
 	public void run(){
+		mathematics.calculateFourierSeriesCoefficients();
+		
+		
+		// The render loop
 		long last_time_rendered = System.nanoTime();
 		
 		// Run the animation for one loop of the complex function
-		while(mathematics.independent_variable <= 1.05 && !Thread.currentThread().isInterrupted()){
+		while(mathematics.independent_variable <= 1.05 && !should_stop_thread){
 			long current_time = System.nanoTime();
 			long delta_render = current_time - last_time_rendered;
-			
-			checkIfShouldStop();
 			
 			// Do the calculations for the fourier series and rendering so that
 			// the only thing left to do is to render the screen
@@ -53,20 +55,6 @@ public class renderLoop implements Runnable{
 			}
 			
 		}
-	}
-	
-	private void checkIfShouldStop(){
-		while(should_stop_thread){
-			try {
-				if(!has_stopped){
-					has_stopped = true;
-				}
-				Thread.sleep(10);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-		has_stopped = false;
 	}
 
 }
