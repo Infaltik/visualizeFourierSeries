@@ -30,6 +30,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
@@ -46,6 +47,7 @@ public class appWindow extends JFrame{
 	boolean show_arrow_circles_in_animation = true;
 	boolean show_arrows_in_animation = true;
 	JPanel rendering_panel;
+	JPanel settings_panel;
 	
 	// Panel sizes
 	public static int rendering_panel_width = 1400;
@@ -71,6 +73,8 @@ public class appWindow extends JFrame{
 	
 	JSpinner nbr_of_fourier_terms_spinner;
 	
+	public static JProgressBar calculations_progress_bar;
+	
 	// Standard format to output decimals
 	DecimalFormat numberFormat = new DecimalFormat("0.0000");
 	
@@ -84,6 +88,8 @@ public class appWindow extends JFrame{
 	
 	// Flag used for rendering
 	boolean arrow_calculations_done = false;
+	
+	Thread render_thread;
 
 	public appWindow(String window_title) {
 		
@@ -176,7 +182,7 @@ public class appWindow extends JFrame{
 		
 		this.add(rendering_panel, BorderLayout.WEST);
 		
-		JPanel settings_panel = new JPanel();
+		settings_panel = new JPanel();
 		settings_panel.setBackground(Color.white);
 		settings_panel.setPreferredSize(new Dimension(settings_panel_width,
 				settings_panel_height));
@@ -238,7 +244,7 @@ public class appWindow extends JFrame{
 		JPanel nbr_of_fourier_terms_spinner_panel = new JPanel(new BorderLayout());
 		nbr_of_fourier_terms_spinner_panel.add(new JLabel("Number of arrows"), BorderLayout.NORTH);
 		SpinnerNumberModel nbr_of_fourier_terms_spinner_model = new SpinnerNumberModel(mathematics.nbr_of_fourier_terms,
-				1, 1001, 2);
+				1, 9999, 2);
 		nbr_of_fourier_terms_spinner = new JSpinner(nbr_of_fourier_terms_spinner_model);
 		nbr_of_fourier_terms_spinner.addChangeListener(new ChangeListener(){
 			public void stateChanged(ChangeEvent e) {
@@ -255,12 +261,20 @@ public class appWindow extends JFrame{
 		nbr_of_fourier_terms_spinner_panel.add(restart_button, BorderLayout.SOUTH);
 		nbr_of_fourier_terms_spinner_panel.add(nbr_of_fourier_terms_spinner, BorderLayout.CENTER);
 		
+		
+		JPanel calculations_progress_bar_panel = new JPanel(new BorderLayout());
+		calculations_progress_bar_panel.add(new JLabel("Calculating ..."), BorderLayout.NORTH);
+		calculations_progress_bar = new JProgressBar(0, mathematics.nbr_of_fourier_terms);
+		calculations_progress_bar_panel.add(calculations_progress_bar, BorderLayout.CENTER);
+		
+		
 		settings_panel.add(show_arrow_circles_check_box);
 		settings_panel.add(show_arrows_check_box);
 		settings_panel.add(show_target_image_check_box);
 		settings_panel.add(animation_speed_slider_panel);
 		settings_panel.add(FPS_slider_panel);
 		settings_panel.add(nbr_of_fourier_terms_spinner_panel);
+		settings_panel.add(calculations_progress_bar_panel);
 		
 		this.add(settings_panel, BorderLayout.EAST);
 		
@@ -467,7 +481,7 @@ public class appWindow extends JFrame{
 		mathematics.iterateAddingMoreSamplesToFunction(5); // Make this input dependant on number of fourier terms ???
 		mathematics.calculateFourierSeriesCoefficients();
 		
-		Thread render_thread = new Thread(new renderLoop());
+		render_thread = new Thread(new renderLoop());
 		render_thread.start();
 	}
 	
@@ -606,10 +620,22 @@ public class appWindow extends JFrame{
 		if(pending_value%2 == 0 ){
 			nbr_of_fourier_terms_spinner.setValue(pending_value + 1);
 		}
+		if(current_app_status != RENDERING_FOURIER_ANIMATION){
+			mathematics.nbr_of_fourier_terms = pending_value + 1;
+		}
 	}
 	
 	private void restartButtonPressed(){
+		
+		if(render_thread != null){
+			// Wait for current calculations to finish to
+			// have safe behavior between the threads
+			renderLoop.should_stop_thread = true;
+			waitForRenderThreadToStop();
+		}
+		
 		mathematics.nbr_of_fourier_terms = (int) nbr_of_fourier_terms_spinner.getValue();
+		calculations_progress_bar.setMaximum(mathematics.nbr_of_fourier_terms);
 		
 		if(drawn_image_array.size() != 0){
 			fourier_series_drawn_image_array.clear();
@@ -617,6 +643,8 @@ public class appWindow extends JFrame{
 			mathematics.independent_variable = 0;
 			Main.app_window.arrow_calculations_done = false;
 		}
+		
+		renderLoop.should_stop_thread = false;
 	}
 	
 	private void keyPressedHandler(KeyEvent e){
@@ -733,6 +761,21 @@ public class appWindow extends JFrame{
 						break;
 				}
 			break;
+		}
+	}
+	
+	public void updateCalculationsProgressBar(int current_coefficient_index){
+		calculations_progress_bar.setValue(current_coefficient_index);
+		calculations_progress_bar.paint(calculations_progress_bar.getGraphics());
+	}
+	
+	private void waitForRenderThreadToStop(){
+		while(!renderLoop.has_stopped){
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	

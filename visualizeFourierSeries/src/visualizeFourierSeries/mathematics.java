@@ -59,6 +59,7 @@ public class mathematics {
 		fourier_series_coefficients = new complexNumber[nbr_of_fourier_terms];
 		fourier_series_terms = new complexNumber[nbr_of_fourier_terms];
 		for(int i = 0; i < shift_indices_array.length; i++){
+			Main.app_window.updateCalculationsProgressBar(i);
 			complexNumber current_coefficient = calculateIntegralNumerically(shift_indices_array[i]);
 			fourier_series_coefficients[i] = current_coefficient;
 		}
