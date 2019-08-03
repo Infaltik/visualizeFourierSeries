@@ -267,6 +267,7 @@ public class appWindow extends JFrame{
 		calculations_progress_bar_panel = new JPanel(new BorderLayout());
 		calculations_progress_bar_panel.add(new JLabel("Calculating ..."), BorderLayout.NORTH);
 		calculations_progress_bar = new JProgressBar(0, mathematics.nbr_of_fourier_terms);
+		calculations_progress_bar.setPreferredSize(new Dimension(3*settings_panel_width/5, 30));
 		calculations_progress_bar_panel.add(calculations_progress_bar, BorderLayout.CENTER);
 		calculations_progress_bar_panel.setVisible(false);
 		
@@ -629,6 +630,10 @@ public class appWindow extends JFrame{
 	}
 	
 	private void restartButtonPressed(){
+		calculations_progress_bar_panel.setVisible(true);
+		calculations_progress_bar.setValue(0);
+		calculations_progress_bar_panel.paint(calculations_progress_bar_panel.getGraphics());
+		
 		if(render_thread != null){
 			// Wait for current calculations to finish to
 			// have safe behavior between the threads
