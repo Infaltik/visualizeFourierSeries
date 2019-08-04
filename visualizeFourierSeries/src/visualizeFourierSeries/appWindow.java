@@ -486,6 +486,7 @@ public class appWindow extends JFrame{
 				
 		current_render_loop = new renderLoop();
 		render_thread = new Thread(current_render_loop);
+		render_thread.setDaemon(true);
 		render_thread.start();
 	}
 	
@@ -630,31 +631,36 @@ public class appWindow extends JFrame{
 	}
 	
 	private void restartButtonPressed(){
-		calculations_progress_bar_panel.setVisible(true);
-		calculations_progress_bar.setValue(0);
-		calculations_progress_bar_panel.paint(calculations_progress_bar_panel.getGraphics());
-		
-		if(render_thread != null){
+		if(current_app_status == RENDERING_FOURIER_ANIMATION){
+			calculations_progress_bar_panel.setVisible(true);
+			calculations_progress_bar.setValue(0);
+			calculations_progress_bar_panel.repaint();
+			
 			// Wait for current calculations to finish to
 			// have safe behavior between the threads
 			current_render_loop.should_stop_thread = true;
 			waitForRenderThreadToStop();
+			
+			// Read the current selected value of number of fourier terms and update
+			// the maximum length of the progress bar
+			mathematics.nbr_of_fourier_terms = (int) nbr_of_fourier_terms_spinner.getValue();
+			calculations_progress_bar.setMaximum(mathematics.nbr_of_fourier_terms);
+			
+			// Reset data
+			resetFourierAnimation();
+			
+			// Start a new render loop for the new animation
+			current_render_loop = new renderLoop();
+			render_thread = new Thread(current_render_loop);
+			render_thread.setDaemon(true);
+			render_thread.start();
 		}
-		
-		mathematics.nbr_of_fourier_terms = (int) nbr_of_fourier_terms_spinner.getValue();
-		calculations_progress_bar.setMaximum(mathematics.nbr_of_fourier_terms);
-		
-		if(drawn_image_array.size() != 0){
-			fourier_series_drawn_image_array.clear();
-			mathematics.calculateFourierSeriesCoefficients();
-			mathematics.independent_variable = 0;
-			Main.app_window.arrow_calculations_done = false;
+		else{
+			// Read the current selected value of number of fourier terms and update
+			// the maximum length of the progress bar
+			mathematics.nbr_of_fourier_terms = (int) nbr_of_fourier_terms_spinner.getValue();
+			calculations_progress_bar.setMaximum(mathematics.nbr_of_fourier_terms);
 		}
-		
-		//current_render_loop.should_stop_thread = false;
-		current_render_loop = new renderLoop();
-		render_thread = new Thread(current_render_loop);
-		render_thread.start();
 	}
 	
 	private void keyPressedHandler(KeyEvent e){
@@ -772,6 +778,12 @@ public class appWindow extends JFrame{
 				}
 			break;
 		}
+	}
+	
+	private void resetFourierAnimation(){
+			fourier_series_drawn_image_array.clear();
+			mathematics.independent_variable = 0;
+			Main.app_window.arrow_calculations_done = false;
 	}
 	
 	public void updateCalculationsProgressBar(int current_coefficient_index){

@@ -14,6 +14,8 @@ public class Main {
 	}
 	
 	public static void initialSetup(){
+		imageInputFunctions.lookForSavedImageData();
+		
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (ClassNotFoundException e) {

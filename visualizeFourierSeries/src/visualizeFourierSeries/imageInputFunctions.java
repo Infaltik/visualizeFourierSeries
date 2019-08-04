@@ -28,6 +28,7 @@ public class imageInputFunctions {
 	public static int zoom_y_pos = 0;
 	public static int preview_rectangle_width;
 	public static int preview_rectangle_height;
+	public static ArrayList<File> loadable_files;
 	
 	public static ArrayList<Point> test = new ArrayList<Point>();
 	
@@ -255,6 +256,20 @@ public class imageInputFunctions {
 			e.printStackTrace();
 		}
 		
+	}
+	
+	public static void lookForSavedImageData(){
+		loadable_files = new ArrayList<File>();
+		File folder = new File("src\\visualizeFourierSeries");
+		File[] files_in_folder = folder.listFiles();
+		
+		for(int i = 0; i < files_in_folder.length; i++){
+			File current_file = files_in_folder[i];
+			
+			if(current_file.getName().contains(".txt")){
+				loadable_files.add(current_file);
+			}
+		}
 	}
 	
 
