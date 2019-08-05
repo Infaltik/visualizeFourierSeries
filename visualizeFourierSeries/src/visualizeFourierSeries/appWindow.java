@@ -18,6 +18,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.io.File;
 import java.text.DecimalFormat;
@@ -453,6 +454,34 @@ public class appWindow extends JFrame{
 			// Reset the stroke to default
 			g2.setStroke(new BasicStroke(1));
 		}
+	}
+	
+	public void drawImageArray2(Graphics2D g2, ArrayList<Point> image_array, Color color){
+		GeneralPath path = new GeneralPath();
+		if(image_array.size() != 0)
+			path.moveTo(image_array.get(0).getX(), image_array.get(0).getY());
+		for(int i = 0; i < image_array.size()-2; i += 2) {
+			int current_x = (int) image_array.get(i).getX();
+			int current_y = (int) image_array.get(i).getY();
+			int next_x = (int) image_array.get(i+1).getX();
+			int next_y = (int) image_array.get(i+1).getY();
+			int next_next_x = (int) image_array.get(i+2).getY();
+			int next_next_y = (int) image_array.get(i+2).getY();
+			
+			
+			int cx1a = current_x + (next_x - current_x) / 3;
+			int cy1a = current_y + (next_y - current_y) / 3;
+			int cx1b = next_x - (next_next_x - current_x) / 3;
+			int cy1b = next_y - (next_next_y - current_y) / 3;
+			
+			g2.setStroke(new BasicStroke(drawing_brush_size));
+			g2.setColor(color);
+			path.curveTo(cx1a, cy1a, cx1b, cy1b, next_next_x, next_next_y);
+			
+			// Reset the stroke to default
+			g2.setStroke(new BasicStroke(1));
+		}
+		g2.draw(path);
 	}
 	
 	private void showSelectionButtons(boolean show_buttons){
