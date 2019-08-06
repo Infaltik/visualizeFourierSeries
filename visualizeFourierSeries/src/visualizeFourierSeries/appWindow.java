@@ -789,12 +789,12 @@ public class appWindow extends JFrame{
 					render();
 					break;
 				case 39: // right arrow
-					int max_x_pos = imageInputFunctions.output_image.getWidth()-imageInputFunctions.preview_rectangle_width;
+					int max_x_pos = imageInputFunctions.thresholded_image.getWidth()-imageInputFunctions.preview_rectangle_width;
 					imageInputFunctions.zoom_x_pos = Math.min(max_x_pos, imageInputFunctions.zoom_x_pos+1);
 					render();
 					break;
 				case 40: // down arrow
-					int max_y_pos = imageInputFunctions.output_image.getHeight()-imageInputFunctions.preview_rectangle_height;
+					int max_y_pos = imageInputFunctions.thresholded_image.getHeight()-imageInputFunctions.preview_rectangle_height;
 					imageInputFunctions.zoom_y_pos = Math.min(max_y_pos, imageInputFunctions.zoom_y_pos+1);
 					render();
 					break;
@@ -825,12 +825,12 @@ public class appWindow extends JFrame{
 						render();
 						break;
 					case 39: // right arrow
-						int max_x_pos = imageInputFunctions.output_image.getWidth()-imageInputFunctions.preview_rectangle_width;
+						int max_x_pos = imageInputFunctions.thresholded_image.getWidth()-imageInputFunctions.preview_rectangle_width;
 						imageInputFunctions.zoom_x_pos = Math.min(max_x_pos, imageInputFunctions.zoom_x_pos+1);
 						render();
 						break;
 					case 40: // down arrow
-						int max_y_pos = imageInputFunctions.output_image.getHeight()-imageInputFunctions.preview_rectangle_height;
+						int max_y_pos = imageInputFunctions.thresholded_image.getHeight()-imageInputFunctions.preview_rectangle_height;
 						imageInputFunctions.zoom_y_pos = Math.min(max_y_pos, imageInputFunctions.zoom_y_pos+1);
 						render();
 						break;

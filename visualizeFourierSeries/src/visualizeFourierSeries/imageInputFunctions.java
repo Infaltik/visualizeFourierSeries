@@ -21,7 +21,7 @@ public class imageInputFunctions {
 	
 	public static BufferedImage input_image;
 	public static double[][] normalized_image_array;
-	public static BufferedImage output_image;
+	public static BufferedImage thresholded_image;
 	public static ArrayList<Point> traced_image_array = new ArrayList<Point>();
 	public static int zoomInFactor = 1;
 	public static int zoom_x_pos = 0;
@@ -54,10 +54,10 @@ public class imageInputFunctions {
 			}
 			
 			thresholdImage(normalized_image_array, 0.2);
-			output_image = thresholdImageToBufferedImage(normalized_image_array);
+			thresholded_image = thresholdImageToBufferedImage(normalized_image_array);
 			
 			
-			ImageIO.write(output_image, "png", new File("src/visualizeFourierSeries/output.png"));
+			ImageIO.write(thresholded_image, "png", new File("src/visualizeFourierSeries/output.png"));
 			
 			
 		} catch (IOException e) {
@@ -126,8 +126,8 @@ public class imageInputFunctions {
 		// Draw a portion of the previewed image with large pixels
 		for(int y = 0; y < new_height-1; y++){
 			for(int x = 0; x < new_width-1; x++){
-				if( (x+x_pos < output_image.getWidth()) && (y+y_pos < output_image.getHeight()) ){
-					if(output_image.getRGB(x+x_pos, y+y_pos) == -16777216){
+				if( (x+x_pos < thresholded_image.getWidth()) && (y+y_pos < thresholded_image.getHeight()) ){
+					if(thresholded_image.getRGB(x+x_pos, y+y_pos) == -16777216){
 						drawLargerPixel(result, x, y);
 					}
 				}
@@ -153,23 +153,23 @@ public class imageInputFunctions {
 		// -----------------------
 		
 		
-		int preview_top_left_corner_x = appWindow.rendering_panel_width-output_image.getWidth()-18;
+		int preview_top_left_corner_x = appWindow.rendering_panel_width-thresholded_image.getWidth()-18;
 		int preview_top_left_corner_y = 2;
 		
-		double image_to_panel_ratio = appWindow.rendering_panel_width / ((double) output_image.getWidth()*zoomInFactor);
+		double image_to_panel_ratio = appWindow.rendering_panel_width / ((double) thresholded_image.getWidth()*zoomInFactor);
 		
 		
 		g2.setStroke(new BasicStroke(5));
-		g2.drawRect(preview_top_left_corner_x, preview_top_left_corner_y, output_image.getWidth(), output_image.getHeight());
-		g2.drawImage(output_image, preview_top_left_corner_x, preview_top_left_corner_y,
-				output_image.getWidth(), output_image.getHeight(), null);
+		g2.drawRect(preview_top_left_corner_x, preview_top_left_corner_y, thresholded_image.getWidth(), thresholded_image.getHeight());
+		g2.drawImage(thresholded_image, preview_top_left_corner_x, preview_top_left_corner_y,
+				thresholded_image.getWidth(), thresholded_image.getHeight(), null);
 		
 		// Red rectangle indicator
 		if(image_to_panel_ratio < 1){
 			g2.setColor(Color.red);
 			g2.setStroke(new BasicStroke(2));
 			double proportion = ((double) Main.app_window.getHeight())/Main.app_window.getWidth();
-			preview_rectangle_width = (int) (output_image.getWidth()*image_to_panel_ratio);
+			preview_rectangle_width = (int) (thresholded_image.getWidth()*image_to_panel_ratio);
 			preview_rectangle_height = (int) (preview_rectangle_width*proportion);
 			g2.drawRect(preview_top_left_corner_x + zoom_x_pos, preview_top_left_corner_y + zoom_y_pos,
 					preview_rectangle_width, preview_rectangle_height);
