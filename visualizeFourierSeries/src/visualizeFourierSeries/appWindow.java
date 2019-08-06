@@ -27,6 +27,7 @@ import java.util.Collections;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -67,6 +68,8 @@ public class appWindow extends JFrame{
 	JButton draw_image_button;
 	JButton trace_input_image_button;
 	JButton elephant_image_demo_button;
+	JComboBox saved_image_selection_box;
+	String selected_saved_image;
 	
 	// Settings sliders
 	JSlider animation_speed_slider;
@@ -175,6 +178,17 @@ public class appWindow extends JFrame{
 		elephant_image_demo_button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				showDemoButtonPressed();
+			}
+		});
+		
+		String[] saved_images_names = imageInputFunctions.getSavedImagesNames();
+		saved_image_selection_box = new JComboBox(saved_images_names);
+		saved_image_selection_box.setSelectedIndex(1);
+		selected_saved_image = (String) saved_image_selection_box.getSelectedItem();
+		saved_image_selection_box.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				selected_saved_image = (String) saved_image_selection_box.getSelectedItem();
+				//saved_image_selection_box_handler();
 			}
 		});
 		
@@ -476,12 +490,20 @@ public class appWindow extends JFrame{
 			
 			g2.setStroke(new BasicStroke(drawing_brush_size));
 			g2.setColor(color);
-			path.curveTo(cx1a, cy1a, cx1b, cy1b, next_next_x, next_next_y);
+			path.quadTo(current_x, current_y, next_x, next_y);
+			//path.curveTo(cx1a, cy1a, cx1b, cy1b, next_next_x, next_next_y);
 			
 			// Reset the stroke to default
 			g2.setStroke(new BasicStroke(1));
 		}
+		g2.setStroke(new BasicStroke(drawing_brush_size));
+		
+		GeneralPath path2 = new GeneralPath();
+		path2.moveTo(100, 100);
+		path2.quadTo(140, 120, 200, 100);
+		g2.draw(path2);
 		g2.draw(path);
+		g2.setStroke(new BasicStroke(1));
 	}
 	
 	private void showSelectionButtons(boolean show_buttons){
@@ -489,11 +511,13 @@ public class appWindow extends JFrame{
 			rendering_panel.add(draw_image_button);
 			rendering_panel.add(trace_input_image_button);
 			rendering_panel.add(elephant_image_demo_button);
+			rendering_panel.add(saved_image_selection_box);
 		}
 		else{
 			rendering_panel.remove(draw_image_button);
 			rendering_panel.remove(trace_input_image_button);
 			rendering_panel.remove(elephant_image_demo_button);
+			rendering_panel.remove(saved_image_selection_box);
 		}
 	}
 	
@@ -595,7 +619,13 @@ public class appWindow extends JFrame{
 	private void showDemoButtonPressed(){
 		System.out.println("Elephant image demo button pressed");
 		showSelectionButtons(false);
-		imageInputFunctions.loadElephantImage();
+		if(selected_saved_image.equals("elephant_drawing_data")){
+			imageInputFunctions.loadElephantImage();
+		}
+		else if(selected_saved_image.equals("eighth_note_data")){
+			imageInputFunctions.loadEighthNoteImage();
+		}
+		
 		calculateAndstartFourierAnimation();
 		
 		current_app_status = RENDERING_FOURIER_ANIMATION;

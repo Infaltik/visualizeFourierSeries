@@ -272,5 +272,16 @@ public class imageInputFunctions {
 		}
 	}
 	
+	public static String[] getSavedImagesNames(){
+		String[] names = new String[loadable_files.size()];
+		for(int i = 0; i < names.length; i++){
+			File current_file = loadable_files.get(i);
+			String[] string_parts = current_file.getName().split(".txt");
+			names[i] = string_parts[0];
+		}
+		
+		return names;
+	}
+	
 
 }
