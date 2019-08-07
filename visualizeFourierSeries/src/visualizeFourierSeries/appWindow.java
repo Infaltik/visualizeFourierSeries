@@ -454,7 +454,7 @@ public class appWindow extends JFrame{
 		}
 	}
 	
-	public void drawImageArray(Graphics2D g2, ArrayList<Point> image_array, Color color){
+	public void drawImageArray4(Graphics2D g2, ArrayList<Point> image_array, Color color){
 		g2.setColor(color);
 		for(int i = 0; i < image_array.size()-1; i++) {
 			
@@ -530,6 +530,25 @@ public class appWindow extends JFrame{
 		//curveThrough(g2, path, 302, 616, 274, 514, 514, 514, 0.5);
 		g2.setStroke(new BasicStroke(drawing_brush_size));
 		//path.quadTo(50, 75, 200, 150);
+		g2.draw(path);
+		// Reset the stroke to default
+		g2.setStroke(new BasicStroke(1));
+	}
+	
+	public void drawImageArray(Graphics2D g2, ArrayList<Point> image_array, Color color){
+		g2.setColor(color);
+		GeneralPath path = new GeneralPath();
+		
+		if(image_array.size() != 0)
+			path.moveTo(image_array.get(0).getX(), image_array.get(0).getY());
+		for(int i = 0; i < image_array.size()-1; i++) {
+			int next_x = (int) image_array.get(i).getX();
+			int next_y = (int) image_array.get(i).getY();
+			
+			path.lineTo(next_x, next_y);
+		}
+	
+		g2.setStroke(new BasicStroke(drawing_brush_size));
 		g2.draw(path);
 		// Reset the stroke to default
 		g2.setStroke(new BasicStroke(1));
