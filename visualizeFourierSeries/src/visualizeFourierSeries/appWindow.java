@@ -20,6 +20,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
+import java.awt.geom.QuadCurve2D;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -454,6 +455,7 @@ public class appWindow extends JFrame{
 	}
 	
 	public void drawImageArray(Graphics2D g2, ArrayList<Point> image_array, Color color){
+		g2.setColor(color);
 		for(int i = 0; i < image_array.size()-1; i++) {
 			
 			int current_x = (int) image_array.get(i).getX();
@@ -462,7 +464,6 @@ public class appWindow extends JFrame{
 			int next_y = (int) image_array.get(i+1).getY();
 			
 			g2.setStroke(new BasicStroke(drawing_brush_size));
-			g2.setColor(color);
 			g2.drawLine(current_x, current_y, next_x, next_y);
 			
 			// Reset the stroke to default
@@ -471,6 +472,7 @@ public class appWindow extends JFrame{
 	}
 	
 	public void drawImageArray2(Graphics2D g2, ArrayList<Point> image_array, Color color){
+		g2.setColor(color);
 		GeneralPath path = new GeneralPath();
 		if(image_array.size() != 0)
 			path.moveTo(image_array.get(0).getX(), image_array.get(0).getY());
@@ -489,7 +491,6 @@ public class appWindow extends JFrame{
 			int cy1b = next_y - (next_next_y - current_y) / 3;
 			
 			g2.setStroke(new BasicStroke(drawing_brush_size));
-			g2.setColor(color);
 			path.quadTo(current_x, current_y, next_x, next_y);
 			//path.curveTo(cx1a, cy1a, cx1b, cy1b, next_next_x, next_next_y);
 			
@@ -504,6 +505,70 @@ public class appWindow extends JFrame{
 		g2.draw(path2);
 		g2.draw(path);
 		g2.setStroke(new BasicStroke(1));
+	}
+	
+	public void drawImageArray3(Graphics2D g2, ArrayList<Point> image_array, Color color){
+		g2.setColor(color);
+		GeneralPath path = new GeneralPath();
+		
+		int step = 1;
+		if(image_array.size() != 0)
+			path.moveTo(image_array.get(0).getX(), image_array.get(0).getY());
+		for(int i = 0; i < image_array.size()/step-2; i += 2) { // image_array.size()-2
+			int current_x = (int) image_array.get(step*i).getX();
+			int current_y = (int) image_array.get(step*i).getY();
+			int next_x = (int) image_array.get(step*i+step).getX();
+			int next_y = (int) image_array.get(step*i+step).getY();
+			int next_next_x = (int) image_array.get(step*i+2*step).getX();
+			int next_next_y = (int) image_array.get(step*i+2*step).getY();
+			
+			
+			curveThrough(g2, path, current_x, current_y, next_x, next_y, next_next_x, next_next_y, 0.5);
+		}
+	
+		//path.moveTo(302, 616);
+		//curveThrough(g2, path, 302, 616, 274, 514, 514, 514, 0.5);
+		g2.setStroke(new BasicStroke(drawing_brush_size));
+		//path.quadTo(50, 75, 200, 150);
+		g2.draw(path);
+		// Reset the stroke to default
+		g2.setStroke(new BasicStroke(1));
+	}
+	
+	public void curveThrough(Graphics2D g2, GeneralPath path, int x1, int y1, int x2, int y2, int x3, int y3, double t) {
+		// (x1, y1) is the current point of the path. (x2, y2) (x3, y3) are the points that the curve will
+		// go through. The t parameter determines the curvature of the curve.
+		
+		if(Math.abs(t) > 1) {
+			System.err.println("Error, t has to be between 0 and 1");
+		}
+		//double x_control_point = (x2 - x1 + x1*t*t - x3*t*t)/(-2*t*t + 2*t);
+		//double y_control_point = (y2 - y1 + y1*t*t - y3*t*t)/(-2*t*t + 2*t);
+		
+		double x_control_point = (x3*t*t - x2 + x1*(t-1)*(t-1))/((t-1)*(t-1) + t*t - 1);
+		double y_control_point = (y3*t*t - y2 + y1*(t-1)*(t-1))/((t-1)*(t-1) + t*t - 1);
+		//y_control_point = 325;
+		
+		System.out.println(x_control_point + ", " + y_control_point);
+		
+		boolean test = false;
+		if(test) {
+			g2.fillRect(x1-5, y1-5, 10, 10);
+			g2.fillRect(x2-5, y2-5, 10, 10);
+			g2.fillRect(x3-5, y3-5, 10, 10);
+			
+			Color prev_color = g2.getColor();
+			g2.setColor(Color.red);
+			g2.fillRect((int) x_control_point-5, (int) y_control_point-5, 10, 10);
+			g2.setColor(prev_color);
+			
+			//QuadCurve2D curve = new QuadCurve2D.Double(x1, y1, x_control_point, y_control_point, x3, y3);
+			//g2.setColor(Color.red);
+			//g2.draw(curve);
+		}
+		
+		
+		path.quadTo(x_control_point, y_control_point, x3, y3);
 	}
 	
 	private void showSelectionButtons(boolean show_buttons){
@@ -682,10 +747,11 @@ public class appWindow extends JFrame{
 	private void nbrOfFourierTermsSpinnerEventHandler(ChangeEvent e){
 		int pending_value = (int) nbr_of_fourier_terms_spinner.getValue();
 		if(pending_value%2 == 0 ){
-			nbr_of_fourier_terms_spinner.setValue(pending_value + 1);
+			pending_value  = pending_value + 1;
+			nbr_of_fourier_terms_spinner.setValue(pending_value);
 		}
 		if(current_app_status != RENDERING_FOURIER_ANIMATION){
-			mathematics.nbr_of_fourier_terms = pending_value + 1;
+			mathematics.nbr_of_fourier_terms = pending_value;
 		}
 	}
 	
