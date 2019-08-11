@@ -1,5 +1,6 @@
 package visualizeFourierSeries;
 
+import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -21,6 +22,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.awt.geom.QuadCurve2D;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -97,6 +99,10 @@ public class appWindow extends JFrame{
 	
 	renderLoop current_render_loop;
 	Thread render_thread;
+	boolean should_calculate_fourier_coefficients = true;
+	int prev_fourier_coefficients_value = -1;
+	
+	BufferedImage template_image = null;
 
 	public appWindow(String window_title) {
 		
@@ -328,8 +334,7 @@ public class appWindow extends JFrame{
 				rendering_panel.setBackground(Color.black);
 				
 				if(show_target_function_in_animation) {
-					Color color1 = new Color(0, (float) 1, 0, (float) 0.4);
-					drawImageArray(g2, drawn_image_array, color1);
+					g2.drawImage(template_image, 0, 0, rendering_panel_width, rendering_panel_height, null);
 				}
 				
 				g2.setColor(Color.white);
@@ -507,11 +512,11 @@ public class appWindow extends JFrame{
 		g2.setStroke(new BasicStroke(1));
 	}
 	
-	public void drawImageArray3(Graphics2D g2, ArrayList<Point> image_array, Color color){
+	public void drawImageArray5(Graphics2D g2, ArrayList<Point> image_array, Color color){
 		g2.setColor(color);
 		GeneralPath path = new GeneralPath();
 		
-		int step = 1;
+		int step = 50;
 		if(image_array.size() != 0)
 			path.moveTo(image_array.get(0).getX(), image_array.get(0).getY());
 		for(int i = 0; i < image_array.size()/step-2; i += 2) { // image_array.size()-2
@@ -524,6 +529,34 @@ public class appWindow extends JFrame{
 			
 			
 			curveThrough(g2, path, current_x, current_y, next_x, next_y, next_next_x, next_next_y, 0.5);
+		}
+	
+		//path.moveTo(302, 616);
+		//curveThrough(g2, path, 302, 616, 274, 514, 514, 514, 0.5);
+		g2.setStroke(new BasicStroke(drawing_brush_size));
+		//path.quadTo(50, 75, 200, 150);
+		g2.draw(path);
+		// Reset the stroke to default
+		g2.setStroke(new BasicStroke(1));
+	}
+	
+	public void drawImageArray3(Graphics2D g2, ArrayList<Point> image_array, Color color){
+		g2.setColor(color);
+		GeneralPath path = new GeneralPath();
+		
+		int step = 1;
+		if(image_array.size() != 0)
+			path.moveTo(image_array.get(0).getX(), image_array.get(0).getY());
+		for(int i = step; i < image_array.size()/step-2; i += 2) { // image_array.size()-2
+			int prev_x = (int) image_array.get(step*i-step).getX();
+			int prev_y = (int) image_array.get(step*i-step).getY();
+			int current_x = (int) image_array.get(step*i).getX();
+			int current_y = (int) image_array.get(step*i).getY();
+			int next_x = (int) image_array.get(step*i+step).getX();
+			int next_y = (int) image_array.get(step*i+step).getY();
+			
+			
+			curveThrough(g2, path, prev_x, prev_y, current_x, current_y, next_x, next_y, 0.5);
 		}
 	
 		//path.moveTo(302, 616);
@@ -617,6 +650,7 @@ public class appWindow extends JFrame{
 		// Flip array so that the fourier series animation draws in the same
 		// direction as the drawer
 		Collections.reverse(appWindow.drawn_image_array);
+		createTemplateImage();
 						
 		mathematics.convertToComplexAndStoreFunction(appWindow.drawn_image_array);
 		mathematics.iterateAddingMoreSamplesToFunction(5); // Make this input dependant on number of fourier terms ???
@@ -625,6 +659,18 @@ public class appWindow extends JFrame{
 		render_thread = new Thread(current_render_loop);
 		render_thread.setDaemon(true);
 		render_thread.start();
+	}
+	
+	private void createTemplateImage(){
+		BufferedImage image = new BufferedImage(rendering_panel_width, rendering_panel_height, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D imageG2 = (Graphics2D) image.getGraphics();
+		imageG2.setComposite(AlphaComposite.Clear);
+		imageG2.fillRect(0, 0, rendering_panel_width, rendering_panel_height);
+		
+		imageG2.setComposite(AlphaComposite.Src);
+		Color color1 = new Color(0, (float) 1, 0, (float) 0.4);
+		drawImageArray(imageG2, drawn_image_array, color1);
+		template_image = image;
 	}
 	
 	public void render(){
@@ -772,13 +818,18 @@ public class appWindow extends JFrame{
 		if(current_app_status != RENDERING_FOURIER_ANIMATION){
 			mathematics.nbr_of_fourier_terms = pending_value;
 		}
+		if(prev_fourier_coefficients_value != pending_value) {
+			should_calculate_fourier_coefficients = true;
+		}
 	}
 	
 	private void restartButtonPressed(){
 		if(current_app_status == RENDERING_FOURIER_ANIMATION){
-			calculations_progress_bar_panel.setVisible(true);
-			calculations_progress_bar.setValue(0);
-			calculations_progress_bar_panel.repaint();
+			if(should_calculate_fourier_coefficients) {
+				calculations_progress_bar_panel.setVisible(true);
+				calculations_progress_bar.setValue(0);
+				calculations_progress_bar_panel.repaint();
+			}
 			
 			// Wait for current calculations to finish to
 			// have safe behavior between the threads

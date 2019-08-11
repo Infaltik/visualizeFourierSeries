@@ -10,7 +10,10 @@ public class renderLoop implements Runnable{
 	public boolean should_stop_thread = false;
 	
 	public void run(){
-		mathematics.calculateFourierSeriesCoefficients();
+		if(Main.app_window.should_calculate_fourier_coefficients) {
+			mathematics.calculateFourierSeriesCoefficients();
+			Main.app_window.should_calculate_fourier_coefficients = false;
+		}
 		
 		
 		// The render loop
