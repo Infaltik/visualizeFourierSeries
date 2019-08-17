@@ -3,7 +3,7 @@ package visualizeFourierSeries;
 import java.awt.Point;
 import java.awt.Polygon;
 
-public class arrowAndCircleRenderData {
+public class ArrowAndCircleRenderData {
 	
 	private int x_pixel_coordinate;
 	private int y_pixel_coordinate;
@@ -11,7 +11,7 @@ public class arrowAndCircleRenderData {
 	private Polygon arrow_polygon;
 	private int circle_radius;
 	
-	public arrowAndCircleRenderData(int x, int y, Point arrow_end_pnt, Polygon arrow_poly, int circ_radius){
+	public ArrowAndCircleRenderData(int x, int y, Point arrow_end_pnt, Polygon arrow_poly, int circ_radius){
 		x_pixel_coordinate = x;
 		y_pixel_coordinate = y;
 		arrow_end_point = arrow_end_pnt;

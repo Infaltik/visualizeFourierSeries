@@ -5,22 +5,22 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class mathematics {
+public class Mathematics {
 	
 	public static int nbr_of_fourier_terms = 501;
 	public static double independent_variable = 0;
-	public static complexNumber[] complexFunctionToApproximate;
-	public static int originPixelX = appWindow.rendering_panel_width/2;
-	public static int originPixelY = appWindow.rendering_panel_height/2;
+	public static ComplexNumber[] complexFunctionToApproximate;
+	public static int originPixelX = AppWindow.rendering_panel_width/2;
+	public static int originPixelY = AppWindow.rendering_panel_height/2;
 	public static int pixelNormalizingFactor = originPixelY;
 	public static int[] shifting_indices_array;
 	
-	public static complexNumber fourier_series_coefficients[] = new complexNumber[nbr_of_fourier_terms];
-	public static complexNumber fourier_series_terms[] = new complexNumber[nbr_of_fourier_terms];
+	public static ComplexNumber fourier_series_coefficients[] = new ComplexNumber[nbr_of_fourier_terms];
+	public static ComplexNumber fourier_series_terms[] = new ComplexNumber[nbr_of_fourier_terms];
 	
 	
 	public static Point calculateEndPoint(){
-		complexNumber end_point_complex_number = new complexNumber(0,0);
+		ComplexNumber end_point_complex_number = new ComplexNumber(0,0);
 		for(int i = 0; i < nbr_of_fourier_terms; i++){
 			end_point_complex_number = complexAddition(end_point_complex_number, fourier_series_terms[i]);
 		}
@@ -29,7 +29,7 @@ public class mathematics {
 	}
 	
 	public static Point calculateEndPoint(int index){
-		complexNumber end_point_complex_number = new complexNumber(0,0);
+		ComplexNumber end_point_complex_number = new ComplexNumber(0,0);
 		for(int i = 0; i <= index; i++){
 			end_point_complex_number = complexAddition(end_point_complex_number, fourier_series_terms[i]);
 		}
@@ -38,7 +38,7 @@ public class mathematics {
 	}
 	
 	public static Point2D.Double calculateEndPointDouble(int index){
-		complexNumber end_point_complex_number = new complexNumber(0,0);
+		ComplexNumber end_point_complex_number = new ComplexNumber(0,0);
 		for(int i = 0; i <= index; i++){
 			end_point_complex_number = complexAddition(end_point_complex_number, fourier_series_terms[i]);
 		}
@@ -48,8 +48,8 @@ public class mathematics {
 	
 	public static void calculateFourierSeriesTerms(double independent_variable){
 		for(int i = 0; i < nbr_of_fourier_terms; i++){
-			complexNumber exponential_factor = complexExponentialFunction(shifting_indices_array[i]*2*Math.PI*independent_variable);
-			complexNumber current_series_term = complexMultiplication(fourier_series_coefficients[i], exponential_factor);
+			ComplexNumber exponential_factor = complexExponentialFunction(shifting_indices_array[i]*2*Math.PI*independent_variable);
+			ComplexNumber current_series_term = complexMultiplication(fourier_series_coefficients[i], exponential_factor);
 			fourier_series_terms[i] = current_series_term;
 		}
 	}
@@ -58,58 +58,58 @@ public class mathematics {
 		Main.app_window.calculations_progress_bar_panel.setVisible(true);
 		
 		int[] shift_indices_array = createShiftIndices();
-		fourier_series_coefficients = new complexNumber[nbr_of_fourier_terms];
-		fourier_series_terms = new complexNumber[nbr_of_fourier_terms];
+		fourier_series_coefficients = new ComplexNumber[nbr_of_fourier_terms];
+		fourier_series_terms = new ComplexNumber[nbr_of_fourier_terms];
 		for(int i = 0; i < shift_indices_array.length; i++){
 			// Visualize progress in the loading bar
 			Main.app_window.updateCalculationsProgressBar(i);
 			
-			complexNumber current_coefficient = calculateIntegralNumerically(shift_indices_array[i]);
+			ComplexNumber current_coefficient = calculateIntegralNumerically(shift_indices_array[i]);
 			fourier_series_coefficients[i] = current_coefficient;
 		}
 		
 		Main.app_window.calculations_progress_bar_panel.setVisible(false);
 	}
 	
-	public static complexNumber calculateIntegralNumerically(int shifting_index){
+	public static ComplexNumber calculateIntegralNumerically(int shifting_index){
 		int array_length = complexFunctionToApproximate.length;
 		double delta_t = 1.0/array_length;
 		
-		complexNumber res = new complexNumber(0, 0);
+		ComplexNumber res = new ComplexNumber(0, 0);
 		for(int i = 0; i < array_length; i++){
-			complexNumber function_value = complexFunctionToApproximate[i];
-			complexNumber shifting_exponential = complexExponentialFunction(shifting_index*2*Math.PI*delta_t*i);
-			complexNumber mult_result = complexMultiplication(function_value, shifting_exponential);
+			ComplexNumber function_value = complexFunctionToApproximate[i];
+			ComplexNumber shifting_exponential = complexExponentialFunction(shifting_index*2*Math.PI*delta_t*i);
+			ComplexNumber mult_result = complexMultiplication(function_value, shifting_exponential);
 			
 			res = complexAddition(res, mult_result);
 		}
 		
 		// Multiply by the infinitesimal factor in the integral
-		res = new complexNumber(res.getRealPart()*delta_t, res.getImagPart()*delta_t);
+		res = new ComplexNumber(res.getRealPart()*delta_t, res.getImagPart()*delta_t);
 		
 		return res;
 	}
 	
 	public static void iterateAddingMoreSamplesToFunction(int number_of_iterations) {
-		appWindow.initial_drawn_image_array_size = appWindow.drawn_image_array.size();
+		AppWindow.initial_drawn_image_array_size = AppWindow.drawn_image_array.size();
 		for(int i = 1; i <= number_of_iterations; i++) {
-			mathematics.addMoreSamplesToFunction();
+			Mathematics.addMoreSamplesToFunction();
 		}
 	}
 	
 	public static void addMoreSamplesToFunction() {
 		int previous_array_length = complexFunctionToApproximate.length;
-		complexNumber[] new_function_array = new complexNumber[2*previous_array_length-1];
+		ComplexNumber[] new_function_array = new ComplexNumber[2*previous_array_length-1];
 		
 		int k = 0;
 		for(int i = 0; i < previous_array_length-1; i++) {
-			complexNumber prev_value = complexFunctionToApproximate[i];
-			complexNumber next_value = complexFunctionToApproximate[i+1];
+			ComplexNumber prev_value = complexFunctionToApproximate[i];
+			ComplexNumber next_value = complexFunctionToApproximate[i+1];
 			new_function_array[k] = prev_value;
 			k++;
 			double delta_real = next_value.getRealPart() - prev_value.getRealPart();
 			double delta_imag = next_value.getImagPart() - prev_value.getImagPart();
-			new_function_array[k] = new complexNumber(prev_value.getRealPart() + delta_real/2, prev_value.getImagPart() + delta_imag/2);
+			new_function_array[k] = new ComplexNumber(prev_value.getRealPart() + delta_real/2, prev_value.getImagPart() + delta_imag/2);
 			k++;
 		}
 		
@@ -154,26 +154,26 @@ public class mathematics {
 		return vector_sum_index;
 	}
 	
-	public static complexNumber complexExponentialFunction(double input){
-		return new complexNumber(Math.cos(input), Math.sin(input));
+	public static ComplexNumber complexExponentialFunction(double input){
+		return new ComplexNumber(Math.cos(input), Math.sin(input));
 	}
 	
-	public static complexNumber complexMultiplication(complexNumber a, complexNumber b){
+	public static ComplexNumber complexMultiplication(ComplexNumber a, ComplexNumber b){
 		double real_part = a.getRealPart()*b.getRealPart() - a.getImagPart()*b.getImagPart();
 		double imag_part = a.getRealPart()*b.getImagPart() + b.getRealPart()*a.getImagPart();
 		
-		return new complexNumber(real_part, imag_part);
+		return new ComplexNumber(real_part, imag_part);
 	}
 	
-	public static complexNumber complexAddition(complexNumber a, complexNumber b){
+	public static ComplexNumber complexAddition(ComplexNumber a, ComplexNumber b){
 		double real_part = a.getRealPart() + b.getRealPart();
 		double imag_part = a.getImagPart() + b.getImagPart();
 		
-		return new complexNumber(real_part, imag_part);
+		return new ComplexNumber(real_part, imag_part);
 	}
 	
-	public static complexNumber calculateFourierSeriesTerm(complexNumber coefficient, int index, double input){
-		return complexMultiplication(coefficient, mathematics.complexExponentialFunction(index*2*Math.PI*input));
+	public static ComplexNumber calculateFourierSeriesTerm(ComplexNumber coefficient, int index, double input){
+		return complexMultiplication(coefficient, Mathematics.complexExponentialFunction(index*2*Math.PI*input));
 	}
 	
 	public static void convertToComplexAndStoreFunction(ArrayList<Point> image_pixels_array){
@@ -181,11 +181,11 @@ public class mathematics {
 	}
 	
 	
-	public static complexNumber[] pixelArrayToComplexNumberArray(ArrayList<Point> image_pixels){
+	public static ComplexNumber[] pixelArrayToComplexNumberArray(ArrayList<Point> image_pixels){
 		// Take in the array of image pixels and return a coordinate value (complex number) for each pixel
 		
 		int array_length = image_pixels.size();
-		complexNumber[] complex_numbers_array = new complexNumber[array_length];
+		ComplexNumber[] complex_numbers_array = new ComplexNumber[array_length];
 		
 		for(int i = 0; i < array_length; i++){
 			complex_numbers_array[i] = pixelToComplexNumber(image_pixels.get(i));
@@ -194,15 +194,15 @@ public class mathematics {
 		return complex_numbers_array;
 	}
 	
-	public static complexNumber pixelToComplexNumber(Point pixel){
+	public static ComplexNumber pixelToComplexNumber(Point pixel){
 		
 		double real_part = ( (double)( pixel.getX()) - originPixelX ) / pixelNormalizingFactor;
 		double imag_part = -( (double)( pixel.getY()) - originPixelY ) / pixelNormalizingFactor;
 		
-		return new complexNumber(real_part, imag_part);
+		return new ComplexNumber(real_part, imag_part);
 	}
 	
-	public static Point complexNumberToPixel(complexNumber complex_number){
+	public static Point complexNumberToPixel(ComplexNumber complex_number){
 		
 		int x_pixel = (int) Math.round(complex_number.getRealPart()*pixelNormalizingFactor + originPixelX);
 		int y_pixel = (int) Math.round(-complex_number.getImagPart()*pixelNormalizingFactor + originPixelY);
@@ -210,7 +210,7 @@ public class mathematics {
 		return new Point(x_pixel, y_pixel);
 	}
 	
-	public static Point2D.Double complexNumberToPixelDouble(complexNumber complex_number){
+	public static Point2D.Double complexNumberToPixelDouble(ComplexNumber complex_number){
 		
 		double x_pixel = complex_number.getRealPart()*pixelNormalizingFactor + originPixelX;
 		double y_pixel = -complex_number.getImagPart()*pixelNormalizingFactor + originPixelY;
@@ -222,13 +222,13 @@ public class mathematics {
 		return complex_magnitude*pixelNormalizingFactor;
 	}
 	
-	public static complexNumber complexNumber2x2MatrixMult(double[][] matrix, complexNumber complex_number) {
+	public static ComplexNumber complexNumber2x2MatrixMult(double[][] matrix, ComplexNumber complex_number) {
 		// Views the complex number as a 2x1 vector and does matrix*vector
 		
 		double real_part = matrix[0][0]*complex_number.getRealPart() + matrix[0][1]*complex_number.getImagPart();
 		double imag_part = matrix[1][0]*complex_number.getRealPart() + matrix[1][1]*complex_number.getImagPart();
 		
-		return new complexNumber(real_part, imag_part);
+		return new ComplexNumber(real_part, imag_part);
 	}
 	
 	public static Point point2x2MatrixMult(double[][] matrix, Point point) {

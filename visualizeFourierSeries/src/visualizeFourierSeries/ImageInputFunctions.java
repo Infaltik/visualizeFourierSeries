@@ -17,7 +17,7 @@ import java.util.Collections;
 
 import javax.imageio.ImageIO;
 
-public class imageInputFunctions {
+public class ImageInputFunctions {
 	
 	public static BufferedImage input_image;
 	public static double[][] normalized_image_array;
@@ -29,6 +29,7 @@ public class imageInputFunctions {
 	public static int preview_rectangle_width;
 	public static int preview_rectangle_height;
 	public static ArrayList<File> loadable_files;
+	public static double test_circle_radius = 100;
 	
 	public static ArrayList<Point> test = new ArrayList<Point>();
 	
@@ -105,12 +106,12 @@ public class imageInputFunctions {
 	}
 	
 	public static void zoomOut(){
-		zoomInFactor = Math.max(1, imageInputFunctions.zoomInFactor-1);
+		zoomInFactor = Math.max(1, ImageInputFunctions.zoomInFactor-1);
 	}
 	
 	public static BufferedImage getZoomedInImage(int x_pos, int y_pos){
-		int old_width = appWindow.rendering_panel_width;
-		int old_height = appWindow.rendering_panel_height;
+		int old_width = AppWindow.rendering_panel_width;
+		int old_height = AppWindow.rendering_panel_height;
 		BufferedImage result = new BufferedImage(old_width, old_height, BufferedImage.TYPE_BYTE_GRAY);
 		
 		// Initialize the result image by a white background
@@ -153,10 +154,10 @@ public class imageInputFunctions {
 		// -----------------------
 		
 		
-		int preview_top_left_corner_x = appWindow.rendering_panel_width-thresholded_image.getWidth()-18;
+		int preview_top_left_corner_x = AppWindow.rendering_panel_width-thresholded_image.getWidth()-18;
 		int preview_top_left_corner_y = 2;
 		
-		double image_to_panel_ratio = appWindow.rendering_panel_width / ((double) thresholded_image.getWidth()*zoomInFactor);
+		double image_to_panel_ratio = AppWindow.rendering_panel_width / ((double) thresholded_image.getWidth()*zoomInFactor);
 		
 		
 		g2.setStroke(new BasicStroke(5));
@@ -191,8 +192,8 @@ public class imageInputFunctions {
 		g2.drawString("Tracing marker coordinates: x=" + current_point.x + ", y=" + current_point.y, 
 				50, 50);
 		
-		g2.drawString("Distance from mouse pointer to marker x=: " + (appWindow.x-x)+
-				", y=" + (appWindow.y-y), 50, 75);
+		g2.drawString("Distance from mouse pointer to marker x=: " + (AppWindow.x-x)+
+				", y=" + (AppWindow.y-y), 50, 75);
 		
 	}
 	
@@ -256,6 +257,18 @@ public class imageInputFunctions {
 			e.printStackTrace();
 		}
 		
+	}
+	
+	public static void loadTestCircle() {
+		ArrayList<Point2D.Double> result_array = new ArrayList<Point2D.Double>();
+		int number_of_points = 10000;
+		double step = (2*Math.PI)/number_of_points;
+		
+		for(int i = 0; i <= number_of_points; i++) {
+			result_array.add(new Point2D.Double(test_circle_radius*Math.cos(i*step) + Mathematics.originPixelX - test_circle_radius/2
+					, test_circle_radius*Math.sin(i*step) + Mathematics.originPixelY - test_circle_radius/2));
+		}
+		Main.app_window.drawn_image_array_double = result_array;
 	}
 	
 	public static void lookForSavedImageData(){
