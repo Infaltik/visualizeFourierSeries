@@ -1,1 +1,3 @@
-# visualizeFourierSeries
+# VisualizeFourierSeries
+
+
