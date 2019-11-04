@@ -4,3 +4,4 @@ Complex functions are two dimensional in the sense that they have both a real an
 
 ![](demoWithCircles.gif)
 ![](demoWithoutCircles.gif)
+![](demoWithoutCircles2.gif)
