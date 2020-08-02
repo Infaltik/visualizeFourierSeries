@@ -6,7 +6,7 @@ Complex functions are two dimensional in the sense that they have both a real an
 ## Examples
 
 <p align="center">
-  ![](demoWithCircles.gif)
+  <img src="demoWithCircles.gif" width="400"/>
 </p>
 
 The above image shows the circle boundaries which each vector is constricted to rotate within. The image below shows the same image being drawn but without the circle boundaries.
